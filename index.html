@@ -1,0 +1,2542 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Alkaba Race: Going to Space Restaurant</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Outfit:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            fredoka: ['Fredoka', 'sans-serif'],
+            outfit: ['Outfit', 'sans-serif'],
+          },
+          colors: {
+            space: {
+              950: '#060614',
+              900: '#0c0d28',
+              800: '#151745',
+              700: '#23256e',
+            },
+            neon: {
+              purple: '#b026ff',
+              cyan: '#00f0ff',
+              pink: '#ff2a85',
+              emerald: '#05ffa1',
+              gold: '#ffd700',
+              amber: '#ffaa00'
+            }
+          }
+        }
+      }
+    };
+  </script>
+
+  <style>
+    * {
+      touch-action: manipulation;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+    body {
+      font-family: 'Outfit', sans-serif;
+      overflow: hidden;
+      background-color: #060614;
+      color: #f8fafc;
+    }
+    .neon-text-cyan {
+      text-shadow: 0 0 10px rgba(0, 240, 255, 0.7), 0 0 20px rgba(0, 240, 255, 0.4);
+    }
+    .neon-text-pink {
+      text-shadow: 0 0 10px rgba(255, 42, 133, 0.7), 0 0 20px rgba(255, 42, 133, 0.4);
+    }
+    .neon-text-gold {
+      text-shadow: 0 0 10px rgba(255, 215, 0, 0.8), 0 0 25px rgba(255, 170, 0, 0.5);
+    }
+    .neon-border-cyan {
+      box-shadow: 0 0 15px rgba(0, 240, 255, 0.5), inset 0 0 10px rgba(0, 240, 255, 0.2);
+    }
+    .neon-border-pink {
+      box-shadow: 0 0 15px rgba(255, 42, 133, 0.5), inset 0 0 10px rgba(255, 42, 133, 0.2);
+    }
+    .neon-border-emerald {
+      box-shadow: 0 0 15px rgba(5, 255, 161, 0.5), inset 0 0 10px rgba(0, 240, 255, 0.2);
+    }
+    .racer-hangar-bg {
+      background: radial-gradient(circle at 50% 30%, rgba(26, 32, 90, 0.6) 0%, rgba(6, 6, 20, 0.95) 75%);
+    }
+    .holo-podium-beam-green {
+      background: linear-gradient(180deg, rgba(5, 255, 161, 0.28) 0%, rgba(5, 255, 161, 0.08) 60%, rgba(5, 255, 161, 0.45) 100%);
+      clip-path: polygon(15% 0%, 85% 0%, 100% 100%, 0% 100%);
+    }
+    .holo-podium-beam-pink {
+      background: linear-gradient(180deg, rgba(255, 42, 133, 0.28) 0%, rgba(255, 42, 133, 0.08) 60%, rgba(255, 42, 133, 0.45) 100%);
+      clip-path: polygon(15% 0%, 85% 0%, 100% 100%, 0% 100%);
+    }
+    .holo-podium-beam-blue {
+      background: linear-gradient(180deg, rgba(0, 240, 255, 0.28) 0%, rgba(0, 240, 255, 0.08) 60%, rgba(0, 240, 255, 0.45) 100%);
+      clip-path: polygon(15% 0%, 85% 0%, 100% 100%, 0% 100%);
+    }
+    @keyframes gentleBreathing {
+      0%, 100% { transform: translateY(0px) scale(1); }
+      50% { transform: translateY(-7px) scale(1.015); }
+    }
+    .char-idle-anim {
+      animation: gentleBreathing 3.6s ease-in-out infinite;
+      transform-origin: bottom center;
+    }
+    .char-idle-anim-delayed {
+      animation: gentleBreathing 3.8s ease-in-out 0.8s infinite;
+      transform-origin: bottom center;
+    }
+    .char-idle-anim-delayed2 {
+      animation: gentleBreathing 4s ease-in-out 1.5s infinite;
+      transform-origin: bottom center;
+    }
+    .beam-hologram {
+      background: radial-gradient(ellipse at bottom, rgba(0,240,255,0.4) 0%, rgba(176,38,255,0.15) 50%, transparent 80%);
+    }
+    @keyframes floatSlow {
+      0%, 100% { transform: translateY(0px) rotate(0deg); }
+      50% { transform: translateY(-8px) rotate(0.8deg); }
+    }
+    .animate-float {
+      animation: floatSlow 3.5s ease-in-out infinite;
+    }
+    @keyframes pulseGlow {
+      0%, 100% { filter: drop-shadow(0 0 8px rgba(0,240,255,0.6)); }
+      50% { filter: drop-shadow(0 0 18px rgba(255,42,133,0.9)); }
+    }
+    .animate-glow {
+      animation: pulseGlow 2.5s infinite;
+    }
+    .touch-btn {
+      touch-action: none;
+      -webkit-tap-highlight-color: transparent;
+    }
+  </style>
+</head>
+<body class="h-screen w-screen relative overflow-hidden bg-space-950 select-none">
+
+  <canvas id="gameCanvas" class="absolute inset-0 w-full h-full z-0 block"></canvas>
+
+  <!-- Top Global Bar (Audio Toggle, Fullscreen, Title info) -->
+  <header class="absolute top-0 left-0 right-0 z-30 p-3 sm:p-4 flex justify-between items-center bg-gradient-to-b from-space-950/90 via-space-950/40 to-transparent pointer-events-none">
+    <div class="flex items-center space-x-3 pointer-events-auto">
+      <div class="bg-gradient-to-r from-neon-purple to-neon-cyan p-0.5 rounded-xl shadow-lg">
+        <div class="bg-space-900 px-3 py-1.5 rounded-[10px] flex items-center space-x-2">
+          <i class="fa-solid fa-rocket text-neon-cyan text-sm sm:text-base"></i>
+          <span class="font-fredoka font-bold text-xs sm:text-sm tracking-wider text-white">ALKABA RACE</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="flex items-center space-x-2 sm:space-x-3 pointer-events-auto">
+      <button id="btnAudioToggle" class="w-11 h-11 sm:w-12 sm:h-12 rounded-xl bg-space-800/80 border border-cyan-500/40 text-neon-cyan hover:bg-space-700/80 transition flex items-center justify-center shadow-lg active:scale-95" title="Toggle Sound">
+        <i id="audioIcon" class="fa-solid fa-volume-high text-lg"></i>
+      </button>
+      <button id="btnFullscreen" class="w-11 h-11 sm:w-12 sm:h-12 rounded-xl bg-space-800/80 border border-purple-500/40 text-neon-purple hover:bg-space-700/80 transition flex items-center justify-center shadow-lg active:scale-95" title="Toggle Fullscreen">
+        <i class="fa-solid fa-expand text-lg"></i>
+      </button>
+    </div>
+  </header>
+
+  <!-- SCREEN 1: Main Menu -->
+  <div id="screenMainMenu" class="absolute inset-0 z-20 flex flex-col items-center justify-center p-4 sm:p-6 overflow-y-auto">
+    <div class="max-w-4xl w-full text-center my-auto flex flex-col items-center">
+      <div class="inline-flex items-center space-x-2 px-4 py-1.5 rounded-full bg-neon-purple/20 border border-neon-purple/50 text-neon-cyan text-xs sm:text-sm font-semibold tracking-widest uppercase mb-3 animate-pulse">
+        <i class="fa-solid fa-graduation-cap"></i>
+        <span>Grade 5 English Cosmic Challenge</span>
+      </div>
+
+      <h1 class="font-fredoka text-4xl sm:text-6xl md:text-7xl font-extrabold tracking-tight text-white mb-2 leading-tight">
+        ALKABA <span class="text-transparent bg-clip-text bg-gradient-to-r from-neon-cyan via-neon-emerald to-neon-pink">RACE</span>
+      </h1>
+      <p class="text-lg sm:text-2xl font-fredoka text-neon-gold mb-6 neon-text-gold flex items-center justify-center gap-2">
+        <i class="fa-solid fa-utensils text-neon-pink"></i>
+        Going to Space Restaurant
+        <i class="fa-solid fa-burger text-neon-emerald"></i>
+      </p>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-3 sm:gap-4 w-full max-w-3xl mb-8 text-left">
+        <div class="bg-space-900/80 backdrop-blur-md p-3.5 sm:p-4 rounded-2xl border border-neon-cyan/30 hover:border-neon-cyan transition shadow-lg flex items-center space-x-3">
+          <div class="w-12 h-12 rounded-xl bg-cyan-500/20 text-neon-cyan flex items-center justify-center text-xl flex-shrink-0">
+            <i class="fa-solid fa-user-astronaut"></i>
+          </div>
+          <div>
+            <h3 class="font-fredoka text-sm sm:text-base font-bold text-white">3 Space Racers</h3>
+            <p class="text-xs text-slate-400">Patrick, Phoebe & Alex with custom agility stats!</p>
+          </div>
+        </div>
+
+        <div class="bg-space-900/80 backdrop-blur-md p-3.5 sm:p-4 rounded-2xl border border-neon-purple/30 hover:border-neon-purple transition shadow-lg flex items-center space-x-3">
+          <div class="w-12 h-12 rounded-xl bg-purple-500/20 text-neon-purple flex items-center justify-center text-xl flex-shrink-0">
+            <i class="fa-solid fa-spell-check"></i>
+          </div>
+          <div>
+            <h3 class="font-fredoka text-sm sm:text-base font-bold text-white">Vocab Quizzes</h3>
+            <p class="text-xs text-slate-400">Collect stars to answer Grade 5 Food & Drink words!</p>
+          </div>
+        </div>
+
+        <div class="bg-space-900/80 backdrop-blur-md p-3.5 sm:p-4 rounded-2xl border border-neon-pink/30 hover:border-neon-pink transition shadow-lg flex items-center space-x-3">
+          <div class="w-12 h-12 rounded-xl bg-pink-500/20 text-neon-pink flex items-center justify-center text-xl flex-shrink-0">
+            <i class="fa-solid fa-robot"></i>
+          </div>
+          <div>
+            <h3 class="font-fredoka text-sm sm:text-base font-bold text-white">Space Restaurant Feast</h3>
+            <p class="text-xs text-slate-400">Meet the 4-armed Robot Waiter at the finish line!</p>
+          </div>
+        </div>
+      </div>
+
+      <button id="btnStartGame" class="group relative inline-flex items-center justify-center px-8 sm:px-12 py-4 sm:py-5 text-xl sm:text-2xl font-fredoka font-bold text-space-950 bg-gradient-to-r from-neon-cyan via-neon-emerald to-neon-gold rounded-2xl shadow-xl hover:scale-105 active:scale-95 transition duration-200 cursor-pointer min-h-[56px] min-w-[240px]">
+        <span class="flex items-center space-x-3">
+          <span>START MISSION</span>
+          <i class="fa-solid fa-angles-right group-hover:translate-x-1 transition-transform"></i>
+        </span>
+      </button>
+
+      <div class="mt-4 text-xs sm:text-sm text-slate-400 font-medium">
+        Designed for Mobile, Tablets, Laptops & Interactive Flat Panels (IFP)
+      </div>
+    </div>
+  </div>
+
+  <!-- SCREEN 2: Mode Select -->
+  <div id="screenModeSelect" class="hidden absolute inset-0 z-20 flex flex-col items-center justify-center p-4 sm:p-6 overflow-y-auto">
+    <div class="max-w-3xl w-full text-center my-auto flex flex-col items-center">
+      <h2 class="font-fredoka text-3xl sm:text-5xl font-bold text-white mb-2">CHOOSE GAME MODE</h2>
+      <p class="text-slate-300 text-sm sm:text-base mb-8">Race alone to reach the restaurant, or challenge a friend side-by-side!</p>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-5 w-full max-w-2xl mb-8">
+        <button id="btnSelectSolo" class="group relative flex flex-col items-center p-6 sm:p-8 rounded-3xl bg-gradient-to-b from-space-800/90 to-space-900/95 border-2 border-neon-cyan/40 hover:border-neon-cyan transition-all duration-300 hover:scale-[1.03] active:scale-95 text-center shadow-xl cursor-pointer">
+          <div class="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl bg-neon-cyan/15 border border-neon-cyan/40 flex items-center justify-center text-4xl sm:text-5xl text-neon-cyan mb-4 group-hover:rotate-6 transition-transform">
+            <i class="fa-solid fa-user-astronaut"></i>
+          </div>
+          <span class="font-fredoka text-2xl sm:text-3xl font-bold text-white mb-1">SOLO RACE</span>
+          <span class="text-xs sm:text-sm font-semibold text-neon-cyan tracking-wider uppercase mb-3">1 Player Mission</span>
+          <p class="text-xs sm:text-sm text-slate-300 leading-relaxed">
+            Full-screen cosmic race! Dodge comets, collect vocab stars, and reach 1,000 pts to open the Space Restaurant.
+          </p>
+          <div class="mt-4 px-4 py-1.5 rounded-full bg-neon-cyan/20 text-neon-cyan text-xs font-bold">
+            Controls: [A / D] or Touch Buttons
+          </div>
+        </button>
+
+        <button id="btnSelectDuel" class="group relative flex flex-col items-center p-6 sm:p-8 rounded-3xl bg-gradient-to-b from-space-800/90 to-space-900/95 border-2 border-neon-pink/40 hover:border-neon-pink transition-all duration-300 hover:scale-[1.03] active:scale-95 text-center shadow-xl cursor-pointer">
+          <div class="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl bg-neon-pink/15 border border-neon-pink/40 flex items-center justify-center text-4xl sm:text-5xl text-neon-pink mb-4 group-hover:-rotate-6 transition-transform">
+            <i class="fa-solid fa-gamepad"></i>
+          </div>
+          <span class="font-fredoka text-2xl sm:text-3xl font-bold text-white mb-1">DUEL RACE</span>
+          <span class="text-xs sm:text-sm font-semibold text-neon-pink tracking-wider uppercase mb-3">2 Players Split Screen</span>
+          <p class="text-xs sm:text-sm text-slate-300 leading-relaxed">
+            Side-by-side head-to-head battle on the same device! First pilot to reach 1,000 points gets served first!
+          </p>
+          <div class="mt-4 px-4 py-1.5 rounded-full bg-neon-pink/20 text-neon-pink text-xs font-bold">
+            P1: [A / D] vs P2: [Left / Right]
+          </div>
+        </button>
+      </div>
+
+      <button id="btnBackToMain" class="px-6 py-2.5 rounded-xl bg-slate-800/70 hover:bg-slate-700 text-slate-300 font-fredoka text-sm transition">
+        <i class="fa-solid fa-arrow-left mr-2"></i> Back to Title
+      </button>
+    </div>
+  </div>
+
+  <!-- SCREEN 3: Character Select -->
+  <div id="screenCharSelect" class="hidden absolute inset-0 z-20 flex flex-col items-center justify-between p-3 sm:p-5 overflow-y-auto racer-hangar-bg">
+    <div class="w-full max-w-5xl text-center pt-2 sm:pt-4 flex flex-col items-center">
+      <div id="charSelectHeadingBadge" class="inline-block px-4 py-1 rounded-full bg-neon-cyan/20 border border-neon-cyan/50 text-neon-cyan font-bold text-xs uppercase mb-1">
+        PLAYER 1 SELECTION
+      </div>
+      <h2 class="font-fredoka text-3xl sm:text-5xl md:text-6xl font-black text-white tracking-wide uppercase drop-shadow-[0_5px_15px_rgba(0,0,0,0.8)]">
+        CHOOSE YOUR RACER!
+      </h2>
+      <p class="text-slate-300 text-xs sm:text-sm font-medium">Select your astronaut to pilot the cosmic journey to Space Restaurant</p>
+    </div>
+
+    <div class="w-full max-w-6xl grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8 my-auto items-end justify-center py-4 px-2">
+      <!-- Patrick -->
+      <div class="char-card relative flex flex-col items-center cursor-pointer group transition-all duration-300 hover:scale-[1.02]" data-char="patrick">
+        <div class="w-full h-72 sm:h-80 md:h-[350px] relative flex flex-col items-center justify-end">
+          <div class="absolute inset-x-4 bottom-5 top-1 holo-podium-beam-green pointer-events-none group-hover:opacity-100 opacity-80 transition-opacity"></div>
+          <div id="svgPreviewPatrick" class="w-full h-full relative z-10 flex items-end justify-center char-idle-anim filter drop-shadow-[0_8px_16px_rgba(0,0,0,0.6)]"></div>
+          <div class="w-56 sm:w-64 h-8 bg-gradient-to-r from-slate-800 via-slate-700 to-slate-800 rounded-[50%] border-2 border-emerald-400/80 shadow-[0_0_25px_rgba(5,255,161,0.7)] flex items-center justify-center -mt-3 z-0">
+            <div class="w-48 sm:w-56 h-5 rounded-[50%] bg-emerald-500/30 blur-xs"></div>
+          </div>
+        </div>
+        <div class="w-full max-w-[280px] mt-2 bg-space-900/90 backdrop-blur-md rounded-2xl border-2 border-emerald-400 p-3 shadow-[0_0_18px_rgba(5,255,161,0.35)] group-hover:shadow-[0_0_26px_rgba(5,255,161,0.6)] transition-all">
+          <div class="font-fredoka text-center text-2xl font-black tracking-wider text-amber-300 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">
+            PATRICK
+          </div>
+          <div class="grid grid-cols-3 gap-2 mt-2 text-[10px] font-fredoka font-bold uppercase text-center text-slate-300">
+            <div>
+              <span class="block mb-1 text-slate-400">SPEED</span>
+              <div class="w-full bg-space-800 h-2 rounded-full overflow-hidden border border-slate-700">
+                <div class="bg-amber-400 h-full rounded-full" style="width: 65%"></div>
+              </div>
+            </div>
+            <div>
+              <span class="block mb-1 text-slate-400">BOOST</span>
+              <div class="w-full bg-space-800 h-2 rounded-full overflow-hidden border border-slate-700">
+                <div class="bg-amber-400 h-full rounded-full" style="width: 60%"></div>
+              </div>
+            </div>
+            <div>
+              <span class="block mb-1 text-neon-emerald">HANDLING</span>
+              <div class="w-full bg-space-800 h-2 rounded-full overflow-hidden border border-emerald-500/50">
+                <div class="bg-emerald-400 h-full rounded-full shadow-[0_0_8px_#05ffa1]" style="width: 95%"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Phoebe -->
+      <div class="char-card relative flex flex-col items-center cursor-pointer group transition-all duration-300 hover:scale-[1.02]" data-char="phoebe">
+        <div class="w-full h-72 sm:h-80 md:h-[350px] relative flex flex-col items-center justify-end">
+          <div class="absolute inset-x-4 bottom-5 top-1 holo-podium-beam-pink pointer-events-none group-hover:opacity-100 opacity-80 transition-opacity"></div>
+          <div id="svgPreviewPhoebe" class="w-full h-full relative z-10 flex items-end justify-center char-idle-anim-delayed filter drop-shadow-[0_8px_16px_rgba(0,0,0,0.6)]"></div>
+          <div class="w-56 sm:w-64 h-8 bg-gradient-to-r from-slate-800 via-slate-700 to-slate-800 rounded-[50%] border-2 border-pink-500/80 shadow-[0_0_25px_rgba(255,42,133,0.7)] flex items-center justify-center -mt-3 z-0">
+            <div class="w-48 sm:w-56 h-5 rounded-[50%] bg-pink-500/30 blur-xs"></div>
+          </div>
+        </div>
+        <div class="w-full max-w-[280px] mt-2 bg-space-900/90 backdrop-blur-md rounded-2xl border-2 border-pink-500 p-3 shadow-[0_0_18px_rgba(255,42,133,0.35)] group-hover:shadow-[0_0_26px_rgba(255,42,133,0.6)] transition-all">
+          <div class="font-fredoka text-center text-2xl font-black tracking-wider text-pink-300 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">
+            PHOEBE
+          </div>
+          <div class="grid grid-cols-3 gap-2 mt-2 text-[10px] font-fredoka font-bold uppercase text-center text-slate-300">
+            <div>
+              <span class="block mb-1 text-neon-pink">SPEED</span>
+              <div class="w-full bg-space-800 h-2 rounded-full overflow-hidden border border-pink-500/50">
+                <div class="bg-pink-400 h-full rounded-full shadow-[0_0_8px_#ff2a85]" style="width: 95%"></div>
+              </div>
+            </div>
+            <div>
+              <span class="block mb-1 text-slate-400">BOOST</span>
+              <div class="w-full bg-space-800 h-2 rounded-full overflow-hidden border border-slate-700">
+                <div class="bg-amber-400 h-full rounded-full" style="width: 60%"></div>
+              </div>
+            </div>
+            <div>
+              <span class="block mb-1 text-slate-400">HANDLING</span>
+              <div class="w-full bg-space-800 h-2 rounded-full overflow-hidden border border-slate-700">
+                <div class="bg-amber-400 h-full rounded-full" style="width: 65%"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Alex -->
+      <div class="char-card relative flex flex-col items-center cursor-pointer group transition-all duration-300 hover:scale-[1.02]" data-char="alex">
+        <div class="w-full h-72 sm:h-80 md:h-[350px] relative flex flex-col items-center justify-end">
+          <div class="absolute inset-x-4 bottom-5 top-1 holo-podium-beam-blue pointer-events-none group-hover:opacity-100 opacity-80 transition-opacity"></div>
+          <div id="svgPreviewAlex" class="w-full h-full relative z-10 flex items-end justify-center char-idle-anim-delayed2 filter drop-shadow-[0_8px_16px_rgba(0,0,0,0.6)]"></div>
+          <div class="w-56 sm:w-64 h-8 bg-gradient-to-r from-slate-800 via-slate-700 to-slate-800 rounded-[50%] border-2 border-cyan-400/80 shadow-[0_0_25px_rgba(0,240,255,0.7)] flex items-center justify-center -mt-3 z-0">
+            <div class="w-48 sm:w-56 h-5 rounded-[50%] bg-cyan-500/30 blur-xs"></div>
+          </div>
+        </div>
+        <div class="w-full max-w-[280px] mt-2 bg-space-900/90 backdrop-blur-md rounded-2xl border-2 border-cyan-400 p-3 shadow-[0_0_18px_rgba(0,240,255,0.35)] group-hover:shadow-[0_0_26px_rgba(0,240,255,0.6)] transition-all">
+          <div class="font-fredoka text-center text-2xl font-black tracking-wider text-orange-400 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">
+            ALEX
+          </div>
+          <div class="grid grid-cols-3 gap-2 mt-2 text-[10px] font-fredoka font-bold uppercase text-center text-slate-300">
+            <div>
+              <span class="block mb-1 text-slate-400">SPEED</span>
+              <div class="w-full bg-space-800 h-2 rounded-full overflow-hidden border border-slate-700">
+                <div class="bg-amber-400 h-full rounded-full" style="width: 65%"></div>
+              </div>
+            </div>
+            <div>
+              <span class="block mb-1 text-neon-cyan">BOOST</span>
+              <div class="w-full bg-space-800 h-2 rounded-full overflow-hidden border border-cyan-500/50">
+                <div class="bg-cyan-400 h-full rounded-full shadow-[0_0_8px_#00f0ff]" style="width: 95%"></div>
+              </div>
+            </div>
+            <div>
+              <span class="block mb-1 text-slate-400">HANDLING</span>
+              <div class="w-full bg-space-800 h-2 rounded-full overflow-hidden border border-slate-700">
+                <div class="bg-amber-400 h-full rounded-full" style="width: 65%"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="pb-3 pt-1">
+      <button id="btnBackToMode" class="px-6 py-2 rounded-xl bg-slate-800/80 hover:bg-slate-700 text-slate-300 font-fredoka text-xs sm:text-sm shadow-md transition">
+        <i class="fa-solid fa-arrow-left mr-2"></i> Back
+      </button>
+    </div>
+  </div>
+
+  <!-- SCREEN 4: Rocket Skin Select -->
+  <div id="screenSkinSelect" class="hidden absolute inset-0 z-20 flex flex-col items-center justify-between p-4 sm:p-6 overflow-y-auto">
+    <div class="w-full max-w-4xl text-center pt-8">
+      <div id="skinSelectHeadingBadge" class="inline-block px-4 py-1 rounded-full bg-neon-purple/20 border border-neon-purple/50 text-neon-pink font-bold text-xs uppercase mb-2">
+        Player 1 Rocket Hull
+      </div>
+      <h2 class="font-fredoka text-3xl sm:text-4xl font-bold text-white">SELECT YOUR 'ALKABA' ROCKET!</h2>
+      <p class="text-slate-300 text-xs sm:text-sm">Select high-speed plasma thruster chassis for your mission!</p>
+    </div>
+
+    <div class="w-full max-w-5xl grid grid-cols-1 md:grid-cols-3 gap-5 sm:gap-6 my-auto items-center justify-center py-4">
+      <!-- Red Fireburst -->
+      <div class="skin-card flex flex-col items-center p-5 rounded-3xl bg-space-900/90 border-2 border-red-500/50 hover:border-red-400 hover:shadow-[0_0_25px_rgba(239,68,68,0.45)] transition-all duration-300 cursor-pointer group" data-skin="red">
+        <div class="w-full h-48 flex items-center justify-center relative rounded-2xl overflow-hidden mb-3 bg-gradient-to-b from-red-950/50 via-space-950/80 to-space-950">
+          <div class="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-red-500/20 via-transparent to-transparent pointer-events-none"></div>
+          <div id="skinPreviewRed" class="w-28 h-40 transition-transform duration-300 group-hover:scale-110"></div>
+        </div>
+        <div class="flex items-center gap-2">
+          <h3 class="font-fredoka text-xl font-bold text-red-400">RED / MERAH</h3>
+          <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-red-500/20 text-red-300 border border-red-500/40">ALKABA V1</span>
+        </div>
+        <p class="text-xs text-slate-300 text-center mt-1.5 leading-relaxed">Aerodynamic interceptor hull with twin hyper-velocity fiery orange plasma thrusters.</p>
+        <button class="mt-4 w-full py-2.5 rounded-xl bg-red-500/20 border border-red-500/60 text-red-400 font-fredoka font-bold text-sm group-hover:bg-red-500 group-hover:text-white transition shadow-md">
+          <i class="fa-solid fa-check mr-1.5"></i> Equip Red
+        </button>
+      </div>
+
+      <!-- Blue Cosmic -->
+      <div class="skin-card flex flex-col items-center p-5 rounded-3xl bg-space-900/90 border-2 border-cyan-500/50 hover:border-neon-cyan hover:shadow-[0_0_25px_rgba(0,240,255,0.45)] transition-all duration-300 cursor-pointer group" data-skin="blue">
+        <div class="w-full h-48 flex items-center justify-center relative rounded-2xl overflow-hidden mb-3 bg-gradient-to-b from-cyan-950/50 via-space-950/80 to-space-950">
+          <div class="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-cyan-500/20 via-transparent to-transparent pointer-events-none"></div>
+          <div id="skinPreviewBlue" class="w-28 h-40 transition-transform duration-300 group-hover:scale-110"></div>
+        </div>
+        <div class="flex items-center gap-2">
+          <h3 class="font-fredoka text-xl font-bold text-neon-cyan">BLUE / BIRU</h3>
+          <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-cyan-500/20 text-cyan-300 border border-cyan-500/40">ALKABA V2</span>
+        </div>
+        <p class="text-xs text-slate-300 text-center mt-1.5 leading-relaxed">Stealth navy frame with dual warp-conduit strakes and electric blue plasma exhausts.</p>
+        <button class="mt-4 w-full py-2.5 rounded-xl bg-cyan-500/20 border border-cyan-500/60 text-neon-cyan font-fredoka font-bold text-sm group-hover:bg-cyan-500 group-hover:text-space-950 transition shadow-md">
+          <i class="fa-solid fa-check mr-1.5"></i> Equip Blue
+        </button>
+      </div>
+
+      <!-- Green Emerald -->
+      <div class="skin-card flex flex-col items-center p-5 rounded-3xl bg-space-900/90 border-2 border-emerald-500/50 hover:border-neon-emerald hover:shadow-[0_0_25px_rgba(5,255,161,0.45)] transition-all duration-300 cursor-pointer group" data-skin="green">
+        <div class="w-full h-48 flex items-center justify-center relative rounded-2xl overflow-hidden mb-3 bg-gradient-to-b from-emerald-950/50 via-space-950/80 to-space-950">
+          <div class="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-emerald-500/20 via-transparent to-transparent pointer-events-none"></div>
+          <div id="skinPreviewGreen" class="w-28 h-40 transition-transform duration-300 group-hover:scale-110"></div>
+        </div>
+        <div class="flex items-center gap-2">
+          <h3 class="font-fredoka text-xl font-bold text-neon-emerald">GREEN / HIJAU</h3>
+          <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/40">ALKABA V3</span>
+        </div>
+        <p class="text-xs text-slate-300 text-center mt-1.5 leading-relaxed">Titanium bio-composite fighter with luminescent nitro veins and emerald energy trails.</p>
+        <button class="mt-4 w-full py-2.5 rounded-xl bg-emerald-500/20 border border-emerald-500/60 text-neon-emerald font-fredoka font-bold text-sm group-hover:bg-emerald-500 group-hover:text-space-950 transition shadow-md">
+          <i class="fa-solid fa-check mr-1.5"></i> Equip Green
+        </button>
+      </div>
+    </div>
+
+    <div class="pb-6">
+      <button id="btnBackToChar" class="px-6 py-2 rounded-xl bg-slate-800/70 hover:bg-slate-700 text-slate-300 font-fredoka text-xs sm:text-sm">
+        <i class="fa-solid fa-arrow-left mr-2"></i> Back
+      </button>
+    </div>
+  </div>
+
+  <!-- SCREEN 5: Gameplay Canvas Overlay -->
+  <div id="screenGameplay" class="hidden absolute inset-0 z-10 pointer-events-none flex flex-col justify-between p-3 sm:p-5">
+    <div class="w-full flex justify-between items-start gap-4 pt-12 sm:pt-14">
+      <!-- Player 1 HUD -->
+      <div id="p1Hud" class="bg-space-900/85 backdrop-blur-md p-2.5 sm:p-3.5 rounded-2xl border border-neon-cyan/40 shadow-xl flex items-center space-x-3 pointer-events-auto min-w-[150px] sm:min-w-[220px]">
+        <div id="p1HudAvatar" class="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-space-800 border border-neon-cyan flex items-center justify-center overflow-hidden flex-shrink-0"></div>
+        <div class="flex-1">
+          <div class="flex justify-between items-center text-xs font-bold mb-1">
+            <span id="p1HudName" class="text-neon-cyan font-fredoka tracking-wide">P1: PATRICK</span>
+            <span id="p1HudScore" class="text-white font-mono text-sm sm:text-base">0 PTS</span>
+          </div>
+          <div class="w-full bg-space-800 h-2.5 rounded-full overflow-hidden border border-slate-700">
+            <div id="p1FuelBar" class="bg-gradient-to-r from-neon-emerald to-neon-cyan h-full rounded-full transition-all duration-200" style="width: 100%"></div>
+          </div>
+          <div class="flex justify-between text-[10px] text-slate-400 mt-0.5">
+            <span>Fuel Level</span>
+            <span id="p1FuelText">100%</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Distance marker -->
+      <div class="hidden md:flex flex-col items-center bg-space-900/80 backdrop-blur-md px-4 py-2 rounded-2xl border border-neon-gold/40 text-center pointer-events-auto">
+        <span class="text-[11px] font-bold text-neon-gold uppercase tracking-wider flex items-center gap-1">
+          <i class="fa-solid fa-flag-checkered"></i> Target: Space Restaurant
+        </span>
+        <span class="font-mono text-sm font-extrabold text-white">1,000 PTS GOAL</span>
+      </div>
+
+      <!-- Player 2 HUD (Duel mode) -->
+      <div id="p2Hud" class="hidden bg-space-900/85 backdrop-blur-md p-2.5 sm:p-3.5 rounded-2xl border border-neon-pink/40 shadow-xl flex items-center space-x-3 pointer-events-auto min-w-[150px] sm:min-w-[220px]">
+        <div id="p2HudAvatar" class="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-space-800 border border-neon-pink flex items-center justify-center overflow-hidden flex-shrink-0"></div>
+        <div class="flex-1">
+          <div class="flex justify-between items-center text-xs font-bold mb-1">
+            <span id="p2HudName" class="text-neon-pink font-fredoka tracking-wide">P2: PHOEBE</span>
+            <span id="p2HudScore" class="text-white font-mono text-sm sm:text-base">0 PTS</span>
+          </div>
+          <div class="w-full bg-space-800 h-2.5 rounded-full overflow-hidden border border-slate-700">
+            <div id="p2FuelBar" class="bg-gradient-to-r from-neon-gold to-neon-pink h-full rounded-full transition-all duration-200" style="width: 100%"></div>
+          </div>
+          <div class="flex justify-between text-[10px] text-slate-400 mt-0.5">
+            <span>Fuel Level</span>
+            <span id="p2FuelText">100%</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Touch Buttons for Mobile/IFP -->
+    <div class="w-full flex justify-between items-end pb-2 pointer-events-none">
+      <div id="p1TouchControls" class="flex space-x-3 pointer-events-auto">
+        <button id="p1BtnLeft" class="touch-btn w-16 h-16 sm:w-20 sm:h-20 rounded-2xl bg-space-900/80 border-2 border-neon-cyan text-neon-cyan active:bg-neon-cyan active:text-space-950 flex flex-col items-center justify-center shadow-2xl transition select-none">
+          <i class="fa-solid fa-caret-left text-2xl sm:text-3xl"></i>
+          <span class="text-[10px] font-bold">LEFT (A)</span>
+        </button>
+        <button id="p1BtnRight" class="touch-btn w-16 h-16 sm:w-20 sm:h-20 rounded-2xl bg-space-900/80 border-2 border-neon-cyan text-neon-cyan active:bg-neon-cyan active:text-space-950 flex flex-col items-center justify-center shadow-2xl transition select-none">
+          <i class="fa-solid fa-caret-right text-2xl sm:text-3xl"></i>
+          <span class="text-[10px] font-bold">RIGHT (D)</span>
+        </button>
+      </div>
+
+      <div id="p2TouchControls" class="hidden flex space-x-3 pointer-events-auto">
+        <button id="p2BtnLeft" class="touch-btn w-16 h-16 sm:w-20 sm:h-20 rounded-2xl bg-space-900/80 border-2 border-neon-pink text-neon-pink active:bg-neon-pink active:text-space-950 flex flex-col items-center justify-center shadow-2xl transition select-none">
+          <i class="fa-solid fa-caret-left text-2xl sm:text-3xl"></i>
+          <span class="text-[10px] font-bold">LEFT (◀)</span>
+        </button>
+        <button id="p2BtnRight" class="touch-btn w-16 h-16 sm:w-20 sm:h-20 rounded-2xl bg-space-900/80 border-2 border-neon-pink text-neon-pink active:bg-neon-pink active:text-space-950 flex flex-col items-center justify-center shadow-2xl transition select-none">
+          <i class="fa-solid fa-caret-right text-2xl sm:text-3xl"></i>
+          <span class="text-[10px] font-bold">RIGHT (▶)</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- VOCAB QUIZ MODAL -->
+  <div id="modalVocabQuiz" class="hidden fixed inset-0 z-40 flex items-center justify-center p-4 bg-space-950/80 backdrop-blur-md">
+    <div class="bg-gradient-to-b from-space-900 to-space-950 border-2 border-neon-gold p-6 sm:p-8 rounded-3xl max-w-lg w-full text-center shadow-2xl relative animate-float">
+      <div class="flex justify-between items-center mb-4">
+        <span id="quizPlayerBadge" class="px-3 py-1 rounded-full bg-neon-cyan/20 border border-neon-cyan/40 text-neon-cyan text-xs font-bold uppercase">
+          Player 1 Quiz
+        </span>
+        <span id="quizCategoryBadge" class="px-3 py-1 rounded-full bg-neon-gold/20 border border-neon-gold/40 text-neon-gold text-xs font-bold uppercase flex items-center gap-1">
+          <i class="fa-solid fa-tag"></i> <span id="quizCategoryText">Food</span>
+        </span>
+      </div>
+
+      <div class="relative w-28 h-28 mx-auto mb-3 flex items-center justify-center bg-gradient-to-b from-amber-500/20 to-transparent rounded-full border border-neon-gold/30">
+        <span id="quizEmoji" class="text-6xl sm:text-7xl filter drop-shadow-md">🍓</span>
+        <div class="absolute -top-1 -right-1 text-neon-gold text-xl animate-spin" style="animation-duration: 8s;">
+          <i class="fa-solid fa-star"></i>
+        </div>
+      </div>
+
+      <h3 class="font-fredoka text-xl sm:text-2xl font-bold text-white mb-1">
+        What word matches this item?
+      </h3>
+      <p class="text-slate-300 text-xs sm:text-sm mb-6">
+        Select the correct Grade 5 English vocabulary word to gain <span class="text-neon-gold font-bold">+100 PTS</span> and refuel!
+      </p>
+
+      <div id="quizOptionsContainer" class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-2"></div>
+      <div id="quizFeedback" class="h-6 text-sm font-fredoka font-bold mt-2 text-transparent">Feedback</div>
+    </div>
+  </div>
+
+  <!-- SCREEN 6: Cosmic Restaurant Victory Celebration -->
+  <div id="screenVictory" class="hidden absolute inset-0 z-30 flex flex-col items-center justify-center p-4 sm:p-6 overflow-y-auto bg-space-950/95 backdrop-blur-xl">
+    <div class="max-w-4xl w-full text-center my-auto flex flex-col items-center py-6">
+      
+      <!-- Victory Banner -->
+      <div class="inline-flex items-center space-x-2 px-6 py-2 rounded-full bg-neon-emerald/20 border-2 border-neon-emerald text-neon-emerald text-sm sm:text-base font-bold uppercase tracking-widest mb-3 animate-bounce">
+        <i class="fa-solid fa-trophy text-neon-gold text-lg"></i>
+        <span>MISSION ACCOMPLISHED • 1,000 PTS REACHED!</span>
+      </div>
+
+      <!-- Main Title -->
+      <h2 class="font-fredoka text-3xl sm:text-5xl md:text-6xl font-black text-white mb-1 uppercase tracking-wide">
+        VICTORY! <span class="text-transparent bg-clip-text bg-gradient-to-r from-neon-gold via-neon-pink to-neon-cyan">SPACE RESTAURANT</span>
+      </h2>
+      <p class="text-slate-300 text-xs sm:text-base mb-4 max-w-xl">
+        You successfully piloted through the cosmos to the Space Restaurant! The 4-Armed Robot Waiter has prepared your celebratory galactic feast!
+      </p>
+
+      <!-- Centerpiece Artwork: 4-Armed Robot Waiter on Antigravity Repulsor Beam serving feast -->
+      <div class="relative w-full max-w-lg h-72 sm:h-80 mb-6 flex items-center justify-center">
+        <div id="robotWaiterContainer" class="w-full h-full flex items-center justify-center"></div>
+      </div>
+
+      <!-- Score Breakdown Cards for both pilots -->
+      <div id="victoryScoreContainer" class="grid grid-cols-1 sm:grid-cols-2 gap-4 w-full max-w-xl mb-8">
+        <!-- P1 Result -->
+        <div class="bg-space-900/90 border-2 border-neon-cyan/60 p-4 rounded-2xl flex items-center space-x-4 text-left shadow-[0_0_20px_rgba(0,240,255,0.25)]">
+          <div id="victoryP1Avatar" class="w-14 h-14 rounded-xl bg-space-800 border border-neon-cyan flex items-center justify-center flex-shrink-0"></div>
+          <div>
+            <span class="text-[11px] font-bold text-neon-cyan uppercase tracking-wider">Pilot 1</span>
+            <h4 id="victoryP1Name" class="font-fredoka text-xl font-bold text-white">Patrick</h4>
+            <div class="text-sm font-mono text-neon-gold font-bold" id="victoryP1Score">1,000 PTS</div>
+          </div>
+        </div>
+
+        <!-- P2 Result (If duel mode) -->
+        <div id="victoryP2Card" class="hidden bg-space-900/90 border-2 border-neon-pink/60 p-4 rounded-2xl flex items-center space-x-4 text-left shadow-[0_0_20px_rgba(255,42,133,0.25)]">
+          <div id="victoryP2Avatar" class="w-14 h-14 rounded-xl bg-space-800 border border-neon-pink flex items-center justify-center flex-shrink-0"></div>
+          <div>
+            <span class="text-[11px] font-bold text-neon-pink uppercase tracking-wider">Pilot 2</span>
+            <h4 id="victoryP2Name" class="font-fredoka text-xl font-bold text-white">Phoebe</h4>
+            <div class="text-sm font-mono text-neon-gold font-bold" id="victoryP2Score">850 PTS</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Action Buttons (min-height 56px for touch/IFP) -->
+      <div class="flex flex-wrap justify-center gap-4">
+        <button id="btnPlayAgain" class="px-8 py-4 rounded-2xl bg-gradient-to-r from-neon-cyan to-neon-emerald text-space-950 font-fredoka font-bold text-lg sm:text-xl shadow-lg hover:scale-105 active:scale-95 transition min-h-[56px] min-w-[200px] cursor-pointer">
+          <i class="fa-solid fa-rotate-right mr-2"></i> RACE AGAIN
+        </button>
+        <button id="btnReturnHome" class="px-8 py-4 rounded-2xl bg-space-800 border border-slate-600 hover:bg-space-700 text-white font-fredoka font-bold text-lg sm:text-xl shadow-lg hover:scale-105 active:scale-95 transition min-h-[56px] min-w-[180px] cursor-pointer">
+          <i class="fa-solid fa-house mr-2"></i> MAIN MENU
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <script>
+    class SpaceSoundEngine {
+      constructor() {
+        this.ctx = null;
+        this.muted = false;
+        this.bgmTimer = null;
+        this.bgmStep = 0;
+      }
+
+      initContext() {
+        if (!this.ctx) {
+          const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+          if (AudioContextClass) {
+            this.ctx = new AudioContextClass();
+          }
+        }
+        if (this.ctx && this.ctx.state === 'suspended') {
+          this.ctx.resume();
+        }
+      }
+
+      toggleMute() {
+        this.muted = !this.muted;
+        if (this.muted) {
+          this.stopBGM();
+        } else {
+          this.startBGM();
+        }
+        return this.muted;
+      }
+
+      playTone(freq, type = 'sine', duration = 0.15, gainVal = 0.1) {
+        if (this.muted) return;
+        try {
+          this.initContext();
+          if (!this.ctx) return;
+          const osc = this.ctx.createOscillator();
+          const gain = this.ctx.createGain();
+          osc.type = type;
+          osc.frequency.setValueAtTime(freq, this.ctx.currentTime);
+          gain.gain.setValueAtTime(gainVal, this.ctx.currentTime);
+          gain.gain.exponentialRampToValueAtTime(0.0001, this.ctx.currentTime + duration);
+          osc.connect(gain);
+          gain.connect(this.ctx.destination);
+          osc.start();
+          osc.stop(this.ctx.currentTime + duration);
+        } catch (e) {
+          console.error("Audio error", e);
+        }
+      }
+
+      playStarCollect() {
+        if (this.muted) return;
+        this.initContext();
+        if (!this.ctx) return;
+        const now = this.ctx.currentTime;
+        const notes = [523.25, 659.25, 783.99, 1046.50]; // C5, E5, G5, C6 arpeggio
+        notes.forEach((freq, idx) => {
+          const osc = this.ctx.createOscillator();
+          const gain = this.ctx.createGain();
+          osc.type = 'triangle';
+          osc.frequency.setValueAtTime(freq, now + idx * 0.06);
+          gain.gain.setValueAtTime(0.12, now + idx * 0.06);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.06 + 0.2);
+          osc.connect(gain);
+          gain.connect(this.ctx.destination);
+          osc.start(now + idx * 0.06);
+          osc.stop(now + idx * 0.06 + 0.2);
+        });
+      }
+
+      playCometHit() {
+        if (this.muted) return;
+        this.initContext();
+        if (!this.ctx) return;
+        const now = this.ctx.currentTime;
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(140, now);
+        osc.frequency.exponentialRampToValueAtTime(35, now + 0.45);
+        gain.gain.setValueAtTime(0.25, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.45);
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
+        osc.start(now);
+        osc.stop(now + 0.45);
+      }
+
+      playQuizCorrect() {
+        if (this.muted) return;
+        this.initContext();
+        if (!this.ctx) return;
+        const now = this.ctx.currentTime;
+        [783.99, 1318.51].forEach(freq => {
+          const osc = this.ctx.createOscillator();
+          const gain = this.ctx.createGain();
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(freq, now);
+          gain.gain.setValueAtTime(0.15, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.5);
+          osc.connect(gain);
+          gain.connect(this.ctx.destination);
+          osc.start(now);
+          osc.stop(now + 0.5);
+        });
+      }
+
+      playQuizWrong() {
+        if (this.muted) return;
+        this.initContext();
+        if (!this.ctx) return;
+        const now = this.ctx.currentTime;
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.type = 'square';
+        osc.frequency.setValueAtTime(130, now);
+        osc.frequency.setValueAtTime(110, now + 0.15);
+        gain.gain.setValueAtTime(0.15, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.35);
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
+        osc.start(now);
+        osc.stop(now + 0.35);
+      }
+
+      startBGM() {
+        if (this.muted || this.bgmTimer) return;
+        this.initContext();
+        const scale = [261.63, 293.66, 329.63, 392.00, 440.00, 523.25];
+        const pattern = [0, 2, 4, 3, 5, 4, 2, 1];
+        this.bgmStep = 0;
+        this.bgmTimer = setInterval(() => {
+          if (this.muted) return;
+          const noteIndex = pattern[this.bgmStep % pattern.length];
+          const freq = scale[noteIndex];
+          this.playTone(freq, 'triangle', 0.16, 0.035);
+          this.bgmStep++;
+        }, 220);
+      }
+
+      stopBGM() {
+        if (this.bgmTimer) {
+          clearInterval(this.bgmTimer);
+          this.bgmTimer = null;
+        }
+      }
+    }
+
+    const soundEngine = new SpaceSoundEngine();
+
+    const VOCAB_DATASET = [
+      // Food (9 items)
+      { word: 'strawberry', category: 'Food', emoji: '🍓', hint: 'A sweet red fruit with tiny seeds on the outside' },
+      { word: 'biscuit', category: 'Food', emoji: '🍪', hint: 'A small flat, crisp sweet or savoury baked cake' },
+      { word: 'pepper', category: 'Food', emoji: '🫑', hint: 'A crisp, hollow green or red vegetable' },
+      { word: 'salt', category: 'Food', emoji: '🧂', hint: 'A white mineral substance used to season food' },
+      { word: 'pizza', category: 'Food', emoji: '🍕', hint: 'Flat baked dough topped with cheese and tomato sauce' },
+      { word: 'cake', category: 'Food', emoji: '🍰', hint: 'A sweet baked dessert made from flour, sugar, and eggs' },
+      { word: 'burger', category: 'Food', emoji: '🍔', hint: 'A sandwich consisting of a patty inside a round bun' },
+      { word: 'salad', category: 'Food', emoji: '🥗', hint: 'A cold dish of fresh mixed raw vegetables' },
+      { word: 'noodle', category: 'Food', emoji: '🍜', hint: 'Long thin strips of pasta often served in hot broth' },
+
+      // Drink (5 items)
+      { word: 'water', category: 'Drink', emoji: '💧', hint: 'Clear liquid essential for all plant and animal life' },
+      { word: 'juice', category: 'Drink', emoji: '🧃', hint: 'The natural liquid contained in fruit or vegetables' },
+      { word: 'tea', category: 'Drink', emoji: '🍵', hint: 'A hot drink made by infusing dried crushed leaves' },
+      { word: 'milk', category: 'Drink', emoji: '🥛', hint: 'An opaque white fluid rich in fat and protein' },
+      { word: 'coffee', category: 'Drink', emoji: '☕', hint: 'A dark beverage prepared from roasted coffee beans' },
+
+      // Eating Tools (7 items)
+      { word: 'spoon', category: 'Eating Tools', emoji: '🥄', hint: 'An eating utensil consisting of a small shallow bowl' },
+      { word: 'fork', category: 'Eating Tools', emoji: '🍴', hint: 'An implement with two or more prongs used for lifting food' },
+      { word: 'napkin', category: 'Eating Tools', emoji: '🧻', hint: 'A piece of cloth or paper used at table for wiping lips' },
+      { word: 'chopsticks', category: 'Eating Tools', emoji: '🥢', hint: 'A pair of small thin tapered sticks used for eating' },
+      { word: 'cup', category: 'Eating Tools', emoji: '🥤', hint: 'A small bowl-shaped container used for drinking' },
+      { word: 'knife', category: 'Eating Tools', emoji: '🔪', hint: 'An instrument with a cutting edge or blade attached to a handle' },
+      { word: 'bowl', category: 'Eating Tools', emoji: '🥣', hint: 'A round, deep dish used for soup, cereal, or noodles' }
+    ];
+
+    const SVG_FACTORY = {
+      getAstronautFullBodySVG(charKey) {
+        if (charKey === 'patrick') {
+          return `
+            <svg viewBox="0 0 200 330" class="w-full h-full max-h-[340px]" xmlns="http://www.w3.org/2000/svg">
+              <defs>
+                <linearGradient id="patHairGrad" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stop-color="#ea580c"/>
+                  <stop offset="60%" stop-color="#c2410c"/>
+                  <stop offset="100%" stop-color="#9a3412"/>
+                </linearGradient>
+                <linearGradient id="patShirtGrad" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stop-color="#2d8647"/>
+                  <stop offset="100%" stop-color="#1b5a2e"/>
+                </linearGradient>
+                <linearGradient id="patJeansGrad" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stop-color="#60a5fa"/>
+                  <stop offset="100%" stop-color="#3b82f6"/>
+                </linearGradient>
+                <radialGradient id="patHelmetGrad" cx="40%" cy="35%" r="65%">
+                  <stop offset="0%" stop-color="#fed7aa"/>
+                  <stop offset="40%" stop-color="#f97316"/>
+                  <stop offset="90%" stop-color="#c2410c"/>
+                </radialGradient>
+              </defs>
+
+              <path d="M78 178 L72 268 L88 270 L96 195 L104 195 L112 270 L128 268 L122 178 Z" fill="url(#patJeansGrad)"/>
+              <path d="M85 220 Q88 230 83 245" stroke="#2563eb" stroke-width="2" fill="none"/>
+              <path d="M115 220 Q112 230 117 245" stroke="#2563eb" stroke-width="2" fill="none"/>
+              
+              <ellipse cx="73" cy="275" rx="16" ry="7" fill="#15803d"/>
+              <path d="M57 274 Q73 266 89 274 L87 278 L58 278 Z" fill="#22c55e"/>
+              <path d="M68 271 L76 271" stroke="#facc15" stroke-width="2"/>
+              <path d="M66 274 L78 274" stroke="#facc15" stroke-width="2"/>
+
+              <ellipse cx="127" cy="275" rx="16" ry="7" fill="#15803d"/>
+              <path d="M111 274 Q127 266 143 274 L141 278 L112 278 Z" fill="#22c55e"/>
+              <path d="M122 271 L130 271" stroke="#facc15" stroke-width="2"/>
+              <path d="M120 274 L132 274" stroke="#facc15" stroke-width="2"/>
+
+              <path d="M72 118 L128 118 L124 176 L76 176 Z" fill="url(#patShirtGrad)"/>
+              <path d="M74 118 L55 145 L65 152 L80 128 Z" fill="#2d8647"/>
+              <path d="M62 135 L75 142" stroke="#facc15" stroke-width="3"/>
+              <path d="M58 141 L71 148" stroke="#facc15" stroke-width="3"/>
+
+              <path d="M55 145 L46 122 L54 118 L65 150 Z" fill="#fbcfe8"/>
+              <path d="M46 122 C42 118 43 108 47 106 C51 104 53 112 51 118 Z" fill="#fbcfe8"/>
+              <circle cx="48" cy="119" r="6" fill="#fbcfe8"/>
+
+              <rect x="74" y="168" width="52" height="9" rx="2" fill="#475569"/>
+              <rect x="73" y="166" width="9" height="12" rx="2" fill="#00f0ff"/>
+              <rect x="118" y="166" width="9" height="12" rx="2" fill="#94a3b8"/>
+              <polygon points="96,168 104,168 100,176" fill="#05ffa1" stroke="#047857" stroke-width="1"/>
+
+              <path d="M126 118 L146 142 L138 152 L120 128 Z" fill="#2d8647"/>
+              <path d="M132 135 L121 143" stroke="#facc15" stroke-width="3"/>
+              <path d="M136 140 L125 148" stroke="#facc15" stroke-width="3"/>
+              <path d="M142 144 Q146 175 130 185" stroke="#fbcfe8" stroke-width="11" stroke-linecap="round" fill="none"/>
+
+              <circle cx="148" cy="162" r="24" fill="url(#patHelmetGrad)" stroke="#ea580c" stroke-width="2"/>
+              <ellipse cx="140" cy="160" rx="14" ry="17" fill="#1e1b4b" stroke="#ffffff" stroke-width="3"/>
+              <ellipse cx="137" cy="155" rx="8" ry="11" fill="rgba(255,255,255,0.4)" transform="rotate(-15 137 155)"/>
+
+              <rect x="94" y="104" width="12" height="18" fill="#fbcfe8"/>
+              <ellipse cx="100" cy="85" rx="19" ry="22" fill="#fbcfe8"/>
+              <circle cx="81" cy="86" r="4.5" fill="#fbcfe8"/>
+              <circle cx="119" cy="86" r="4.5" fill="#fbcfe8"/>
+
+              <path d="M80 80 C76 65 88 48 100 48 C115 48 124 58 122 75 C120 68 114 62 108 64 C98 60 88 68 85 75 Z" fill="url(#patHairGrad)"/>
+              <path d="M78 72 C80 62 88 56 94 58 C88 64 86 70 82 76 Z" fill="#ea580c"/>
+              <path d="M96 52 C104 46 112 50 114 56 C108 54 102 54 96 52 Z" fill="#f97316"/>
+
+              <circle cx="93" cy="82" r="3.2" fill="#1e293b"/>
+              <circle cx="94" cy="81" r="1.2" fill="#ffffff"/>
+              <circle cx="107" cy="82" r="3.2" fill="#1e293b"/>
+              <circle cx="108" cy="81" r="1.2" fill="#ffffff"/>
+
+              <path d="M89 76 Q93 74 97 76" stroke="#c2410c" stroke-width="1.8" fill="none"/>
+              <path d="M103 76 Q107 74 111 76" stroke="#c2410c" stroke-width="1.8" fill="none"/>
+              <path d="M93 91 Q100 101 107 91 Z" fill="#991b1b"/>
+              <path d="M94 92 Q100 95 106 92" stroke="#ffffff" stroke-width="2" fill="none"/>
+            </svg>
+          `;
+        } else if (charKey === 'phoebe') {
+          return `
+            <svg viewBox="0 0 200 330" class="w-full h-full max-h-[340px]" xmlns="http://www.w3.org/2000/svg">
+              <defs>
+                <linearGradient id="phoebeHair" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stop-color="#8d4925"/>
+                  <stop offset="50%" stop-color="#6c3414"/>
+                  <stop offset="100%" stop-color="#4a200a"/>
+                </linearGradient>
+                <linearGradient id="phoebeHairSheen" x1="0" y1="0" x2="1" y2="0">
+                  <stop offset="0%" stop-color="#b4683c" stop-opacity="0"/>
+                  <stop offset="50%" stop-color="#f6a97a" stop-opacity="0.65"/>
+                  <stop offset="100%" stop-color="#b4683c" stop-opacity="0"/>
+                </linearGradient>
+                <linearGradient id="phoebeStraightSheen" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stop-color="#f6a97a" stop-opacity="0.5"/>
+                  <stop offset="40%" stop-color="#b4683c" stop-opacity="0.1"/>
+                  <stop offset="100%" stop-color="#4a200a" stop-opacity="0"/>
+                </linearGradient>
+                <linearGradient id="phoebeSkin" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stop-color="#fff1eb"/>
+                  <stop offset="70%" stop-color="#fde0d2"/>
+                  <stop offset="100%" stop-color="#f8ccb8"/>
+                </linearGradient>
+                <radialGradient id="phoebeBlush" cx="50%" cy="50%" r="50%">
+                  <stop offset="0%" stop-color="#ff7b9f" stop-opacity="0.55"/>
+                  <stop offset="100%" stop-color="#ff7b9f" stop-opacity="0"/>
+                </radialGradient>
+                <linearGradient id="phoebeIris" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stop-color="#3d1f0f"/>
+                  <stop offset="60%" stop-color="#844522"/>
+                  <stop offset="100%" stop-color="#c97c45"/>
+                </linearGradient>
+                <linearGradient id="phoebeSweater" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stop-color="#facc15"/>
+                  <stop offset="100%" stop-color="#eab308"/>
+                </linearGradient>
+                <linearGradient id="phoebeOveralls" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stop-color="#312e81"/>
+                  <stop offset="100%" stop-color="#1e1b4b"/>
+                </linearGradient>
+                <radialGradient id="phoebeHelmet" cx="40%" cy="35%" r="65%">
+                  <stop offset="0%" stop-color="#38bdf8"/>
+                  <stop offset="40%" stop-color="#0284c7"/>
+                  <stop offset="90%" stop-color="#0369a1"/>
+                </radialGradient>
+              </defs>
+
+              <path d="M72 76 C66 84 66 102 68 124 C69 127 75 128 80 126 L80 108 L120 108 L120 126 C125 128 131 127 132 124 C134 102 134 84 128 76 Z" fill="url(#phoebeHair)"/>
+              <path d="M73 90 L75 125" stroke="#381706" stroke-width="1.8" stroke-linecap="round" fill="none"/>
+              <path d="M127 90 L125 125" stroke="#381706" stroke-width="1.8" stroke-linecap="round" fill="none"/>
+
+              <!-- Space Helmet on podium beside her feet -->
+              <circle cx="150" cy="268" r="23" fill="url(#phoebeHelmet)" stroke="#facc15" stroke-width="2.5"/>
+              <ellipse cx="154" cy="268" rx="14" ry="16" fill="#090d16" stroke="#bae6fd" stroke-width="2"/>
+              <ellipse cx="157" cy="263" rx="7" ry="10" fill="rgba(255,255,255,0.4)" transform="rotate(-15 157 263)"/>
+
+              <!-- Legs & Overalls -->
+              <path d="M78 185 L74 268 L92 268 L98 200 L102 200 L108 268 L126 268 L122 185 Z" fill="url(#phoebeOveralls)"/>
+              <rect x="72" y="262" width="22" height="6" rx="2" fill="#4338ca"/>
+              <rect x="106" y="262" width="22" height="6" rx="2" fill="#4338ca"/>
+
+              <!-- Pink/White Sneakers -->
+              <ellipse cx="76" cy="275" rx="15" ry="7" fill="#be185d"/>
+              <path d="M62 274 Q76 267 90 274 L89 278 L63 278 Z" fill="#ec4899"/>
+              <path d="M71 272 L79 272" stroke="#ffffff" stroke-width="2"/>
+              <path d="M70 274 L80 274" stroke="#ffffff" stroke-width="2"/>
+
+              <ellipse cx="123" cy="275" rx="15" ry="7" fill="#be185d"/>
+              <path d="M109 274 Q123 267 137 274 L136 278 L110 278 Z" fill="#ec4899"/>
+              <path d="M118 272 L126 272" stroke="#ffffff" stroke-width="2"/>
+              <path d="M117 274 L127 274" stroke="#ffffff" stroke-width="2"/>
+
+              <!-- Yellow Sweater & Overalls -->
+              <path d="M74 122 L126 122 L124 186 L76 186 Z" fill="url(#phoebeSweater)"/>
+              <path d="M80 142 L120 142 L124 186 L76 186 Z" fill="url(#phoebeOveralls)"/>
+              <rect x="80" y="122" width="9" height="24" fill="url(#phoebeOveralls)"/>
+              <circle cx="84.5" cy="144" r="2.5" fill="#facc15"/>
+              <rect x="111" y="122" width="9" height="24" fill="url(#phoebeOveralls)"/>
+              <circle cx="115.5" cy="144" r="2.5" fill="#facc15"/>
+              <rect x="98" y="146" width="14" height="10" rx="2" fill="#0284c7"/>
+              <polygon points="105,148 102,154 108,154" fill="#facc15"/>
+
+              <!-- Right arm on hip -->
+              <path d="M75 124 Q52 145 68 174" stroke="url(#phoebeSweater)" stroke-width="12" stroke-linecap="round" fill="none"/>
+              <circle cx="70" cy="173" r="5" fill="#fde0d2"/>
+
+              <!-- Left arm waving -->
+              <path d="M125 124 Q154 135 158 114" stroke="url(#phoebeSweater)" stroke-width="12" stroke-linecap="round" fill="none"/>
+              <circle cx="159" cy="110" r="6" fill="#fde0d2"/>
+              <path d="M156 104 L157 96" stroke="#fde0d2" stroke-width="2.5" stroke-linecap="round"/>
+              <path d="M160 103 L162 95" stroke="#fde0d2" stroke-width="2.5" stroke-linecap="round"/>
+              <path d="M164 104 L167 97" stroke="#fde0d2" stroke-width="2.5" stroke-linecap="round"/>
+
+              <!-- Neck -->
+              <path d="M94 106 L106 106 L107 122 L93 122 Z" fill="#f8ccb8"/>
+              <ellipse cx="100" cy="108" rx="8" ry="4" fill="#fde0d2"/>
+
+              <!-- Face -->
+              <path d="M82 82 C81 68 88 56 100 56 C112 56 119 68 118 82 C118 97 111 106 100 106 C89 106 82 97 82 82 Z" fill="url(#phoebeSkin)"/>
+              <ellipse cx="81" cy="85" rx="3.5" ry="5.5" fill="#fde0d2"/>
+              <circle cx="81" cy="88" r="1.4" fill="#facc15"/>
+              <ellipse cx="119" cy="85" rx="3.5" ry="5.5" fill="#fde0d2"/>
+              <circle cx="119" cy="88" r="1.4" fill="#facc15"/>
+
+              <ellipse cx="87" cy="89" rx="6" ry="3.5" fill="url(#phoebeBlush)"/>
+              <ellipse cx="113" cy="89" rx="6" ry="3.5" fill="url(#phoebeBlush)"/>
+              <path d="M100 85 Q101 88 98.5 89 Q100 90 102 89" stroke="#e09f80" stroke-width="1.2" stroke-linecap="round" fill="none"/>
+
+              <!-- Eyes -->
+              <ellipse cx="91.5" cy="81" rx="5" ry="5.8" fill="#ffffff"/>
+              <ellipse cx="92.2" cy="81.2" rx="3.8" ry="4.4" fill="url(#phoebeIris)"/>
+              <circle cx="92.2" cy="81.2" r="2.2" fill="#1f130b"/>
+              <circle cx="90.8" cy="79.2" r="1.6" fill="#ffffff"/>
+              <circle cx="93.8" cy="82.8" r="0.9" fill="#ffffff"/>
+              <path d="M86 80.5 Q91.5 75.5 97.2 80" stroke="#2a1208" stroke-width="1.8" stroke-linecap="round" fill="none"/>
+
+              <ellipse cx="108.5" cy="81" rx="5" ry="5.8" fill="#ffffff"/>
+              <ellipse cx="107.8" cy="81.2" rx="3.8" ry="4.4" fill="url(#phoebeIris)"/>
+              <circle cx="107.8" cy="81.2" r="2.2" fill="#1f130b"/>
+              <circle cx="106.4" cy="79.2" r="1.6" fill="#ffffff"/>
+              <circle cx="109.4" cy="82.8" r="0.9" fill="#ffffff"/>
+              <path d="M102.8 80 Q108.5 75.5 114 80.5" stroke="#2a1208" stroke-width="1.8" stroke-linecap="round" fill="none"/>
+
+              <path d="M86.5 74.5 Q91.5 71.5 96.5 73.5" stroke="#5c290f" stroke-width="1.6" stroke-linecap="round" fill="none"/>
+              <path d="M103.5 73.5 Q108.5 71.5 113.5 74.5" stroke="#5c290f" stroke-width="1.6" stroke-linecap="round" fill="none"/>
+
+              <path d="M94 95 Q100 102 106 95" stroke="#d9466f" stroke-width="2.6" stroke-linecap="round" fill="none"/>
+              <path d="M95 95.2 Q100 99.5 105 95.2 Z" fill="#ffffff"/>
+
+              <!-- Shoulder-Length Straight Hair -->
+              <path d="M79 72 C77 56 86 46 100 46 C114 46 123 56 121 72 C125 78 128 92 128 124 C128 126 123 126 119 122 C115 114 115 96 113 88 C108 82 107 78 107 78 C100 77 94 80 89 84 C87 96 87 114 83 122 C79 126 74 126 74 124 C74 92 77 78 79 72 Z" fill="url(#phoebeHair)"/>
+              <path d="M77 82 L76 122" stroke="#602d13" stroke-width="1.5" stroke-linecap="round" fill="none"/>
+              <path d="M80 88 L79 123" stroke="#a35728" stroke-width="1.2" stroke-linecap="round" fill="none"/>
+              <path d="M125 82 L126 122" stroke="#602d13" stroke-width="1.5" stroke-linecap="round" fill="none"/>
+              <path d="M122 88 L123 123" stroke="#a35728" stroke-width="1.2" stroke-linecap="round" fill="none"/>
+
+              <path d="M86 58 Q98 57 108 67 C104 69 98 68 91 66 C87 64 85 61 86 58 Z" fill="#9a522b"/>
+              <path d="M94 56 Q108 55 116 66 C112 67 105 64 99 63 Z" fill="#783a18"/>
+              <path d="M85 55 Q100 49 115 55 Q100 52 85 55 Z" fill="url(#phoebeHairSheen)"/>
+              <polygon points="85,62 86.5,65.5 90,66 87.5,68.5 88,72 85,70 82,72 82.5,68.5 80,66 83.5,65.5" fill="#facc15" stroke="#f59e0b" stroke-width="0.8"/>
+            </svg>
+          `;
+        } else {
+          return `
+            <svg viewBox="0 0 200 330" class="w-full h-full max-h-[340px]" xmlns="http://www.w3.org/2000/svg">
+              <defs>
+                <linearGradient id="alexSweater" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stop-color="#f8fafc"/>
+                  <stop offset="100%" stop-color="#e2e8f0"/>
+                </linearGradient>
+                <linearGradient id="alexPants" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stop-color="#1e293b"/>
+                  <stop offset="100%" stop-color="#0f172a"/>
+                </linearGradient>
+                <radialGradient id="alexHelmet" cx="40%" cy="35%" r="65%">
+                  <stop offset="0%" stop-color="#ffffff"/>
+                  <stop offset="50%" stop-color="#e2e8f0"/>
+                  <stop offset="90%" stop-color="#94a3b8"/>
+                </radialGradient>
+              </defs>
+
+              <path d="M78 180 L72 268 L88 268 L96 195 L104 195 L112 268 L128 268 L122 180 Z" fill="url(#alexPants)"/>
+              <rect x="70" y="263" width="19" height="5" rx="2" fill="#334155"/>
+              <rect x="111" y="263" width="19" height="5" rx="2" fill="#334155"/>
+
+              <ellipse cx="73" cy="275" rx="16" ry="7" fill="#020617"/>
+              <path d="M57 274 Q73 266 89 274 L87 278 L58 278 Z" fill="#0f172a"/>
+              <ellipse cx="127" cy="275" rx="16" ry="7" fill="#020617"/>
+              <path d="M111 274 Q127 266 143 274 L141 278 L112 278 Z" fill="#0f172a"/>
+
+              <path d="M72 118 L128 118 L124 182 L76 182 Z" fill="url(#alexSweater)"/>
+              <path d="M74 140 L126 140 L125 152 L75 152 Z" fill="#dc2626"/>
+
+              <path d="M74 120 Q54 135 48 108" stroke="url(#alexSweater)" stroke-width="13" stroke-linecap="round" fill="none"/>
+              <circle cx="47" cy="102" r="6" fill="#78350f"/>
+              <path d="M42 98 L40 90" stroke="#78350f" stroke-width="2.5" stroke-linecap="round"/>
+              <path d="M46 96 L45 88" stroke="#78350f" stroke-width="2.5" stroke-linecap="round"/>
+              <path d="M50 97 L51 89" stroke="#78350f" stroke-width="2.5" stroke-linecap="round"/>
+
+              <path d="M126 120 L146 144 L138 154 L120 130 Z" fill="url(#alexSweater)"/>
+              <path d="M142 144 Q146 175 130 185" stroke="#78350f" stroke-width="11" stroke-linecap="round" fill="none"/>
+              <rect x="135" y="162" width="11" height="9" rx="2" fill="#0f172a"/>
+              <rect x="137" y="164" width="7" height="5" rx="1" fill="#00f0ff"/>
+              
+              <circle cx="148" cy="162" r="24" fill="url(#alexHelmet)" stroke="#94a3b8" stroke-width="2"/>
+              <path d="M136 140 C146 140 156 145 162 154 L158 172 C152 165 144 162 136 162 Z" fill="#dc2626"/>
+              <ellipse cx="140" cy="160" rx="14" ry="17" fill="#0f172a" stroke="#ffffff" stroke-width="3"/>
+
+              <rect x="94" y="104" width="12" height="18" fill="#78350f"/>
+              <ellipse cx="100" cy="85" rx="19" ry="22" fill="#78350f"/>
+              <circle cx="81" cy="86" r="4.5" fill="#78350f"/>
+              <circle cx="119" cy="86" r="4.5" fill="#78350f"/>
+              <path d="M80 78 C76 60 88 48 100 48 C115 48 124 60 120 78 C116 66 84 66 80 78 Z" fill="#0f172a"/>
+              
+              <rect x="86" y="78" width="12" height="9" rx="2" fill="none" stroke="#0f172a" stroke-width="2.2"/>
+              <rect x="102" y="78" width="12" height="9" rx="2" fill="none" stroke="#0f172a" stroke-width="2.2"/>
+              <line x1="98" y1="81" x2="102" y2="81" stroke="#0f172a" stroke-width="2.5"/>
+              <circle cx="92" cy="82.5" r="2.8" fill="#020617"/>
+              <circle cx="108" cy="82.5" r="2.8" fill="#020617"/>
+
+              <path d="M92 92 Q100 102 108 92 Z" fill="#ffffff"/>
+              <path d="M92 92 Q100 102 108 92" stroke="#451a03" stroke-width="1.8" fill="none"/>
+            </svg>
+          `;
+        }
+      },
+
+      getAstronautSVG(charKey, size = 120) {
+        if (charKey === 'patrick') {
+          return `
+            <svg viewBox="0 0 100 100" width="${size}" height="${size}">
+              <ellipse cx="50" cy="72" rx="26" ry="22" fill="#2d8647" stroke="#1b5a2e" stroke-width="2.5"/>
+              <circle cx="50" cy="40" r="25" fill="#fbcfe8"/>
+              <path d="M30 38 C28 20 40 12 50 12 C62 12 70 20 70 38 C64 26 36 26 30 38 Z" fill="#ea580c"/>
+              <circle cx="44" cy="38" r="3" fill="#1e293b"/>
+              <circle cx="56" cy="38" r="3" fill="#1e293b"/>
+              <path d="M46 47 Q50 53 54 47 Z" fill="#ffffff" stroke="#991b1b" stroke-width="1.5"/>
+              <circle cx="68" cy="65" r="12" fill="#f97316" stroke="#ffffff" stroke-width="1.5"/>
+            </svg>
+          `;
+        } else if (charKey === 'phoebe') {
+          return `
+            <svg viewBox="0 0 100 100" width="${size}" height="${size}">
+              <defs>
+                <linearGradient id="phoebeAvHair" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stop-color="#8d4925"/>
+                  <stop offset="100%" stop-color="#4a200a"/>
+                </linearGradient>
+              </defs>
+              <path d="M26 38 C25 46 25 56 27 62 C29 63 32 63 34 60 L35 50 L65 50 L66 60 C68 63 71 63 73 62 C75 56 75 46 74 38 Z" fill="url(#phoebeAvHair)"/>
+              <ellipse cx="50" cy="74" rx="25" ry="21" fill="#1e1b4b" stroke="#312e81" stroke-width="2"/>
+              <path d="M42 56 L58 56 L56 75 L44 75 Z" fill="#facc15"/>
+              <ellipse cx="50" cy="40" rx="22" ry="22" fill="#fff1eb"/>
+              <circle cx="42" cy="38" r="3.5" fill="#3d1f0f"/>
+              <circle cx="58" cy="38" r="3.5" fill="#3d1f0f"/>
+              <path d="M45 48 Q50 54 55 48" stroke="#d9466f" stroke-width="2.2" stroke-linecap="round" fill="none"/>
+              <path d="M28 38 C26 22 36 14 50 14 C64 14 74 22 72 38 C75 44 76 52 75 61 C72 63 68 62 66 58 C65 52 66 45 66 41 C62 40 56 43 51 46 C46 43 40 40 34 41 C34 45 35 52 34 58 C32 62 28 63 25 61 C24 52 25 44 28 38 Z" fill="url(#phoebeAvHair)"/>
+              <polygon points="36,28 37.5,31 40,31.5 38,33.5 38.5,36 36,34.5 33.5,36 34,33.5 32,31.5 34.5,31" fill="#facc15"/>
+              <circle cx="74" cy="65" r="12" fill="#0284c7" stroke="#facc15" stroke-width="1.5"/>
+            </svg>
+          `;
+        } else {
+          return `
+            <svg viewBox="0 0 100 100" width="${size}" height="${size}">
+              <ellipse cx="50" cy="72" rx="26" ry="22" fill="#f8fafc" stroke="#94a3b8" stroke-width="2.5"/>
+              <path d="M26 68 Q50 74 74 68" stroke="#dc2626" stroke-width="5" fill="none"/>
+              <circle cx="50" cy="40" r="25" fill="#78350f"/>
+              <path d="M30 36 C28 20 40 12 50 12 C62 12 70 20 70 36 C64 24 36 24 30 36 Z" fill="#0f172a"/>
+              <rect x="36" y="34" width="11" height="9" rx="2" fill="none" stroke="#0f172a" stroke-width="2"/>
+              <rect x="53" y="34" width="11" height="9" rx="2" fill="none" stroke="#0f172a" stroke-width="2"/>
+              <line x1="47" y1="38" x2="53" y2="38" stroke="#0f172a" stroke-width="2"/>
+              <circle cx="41.5" cy="38.5" r="2.2" fill="#020617"/>
+              <circle cx="58.5" cy="38.5" r="2.2" fill="#020617"/>
+              <path d="M44 47 Q50 53 56 47 Z" fill="#ffffff" stroke="#451a03" stroke-width="1.5"/>
+            </svg>
+          `;
+        }
+      },
+
+      getRocketSVG(skinKey, size = 120) {
+        let cfg = {
+          hullMain: '#1e293b',
+          hullDark: '#0f172a',
+          hullLight: '#334155',
+          accent: '#00f0ff',
+          accentGlow: '#38bdf8',
+          thrusterCore: '#ffffff',
+          thrusterMid: '#00f0ff',
+          thrusterOuter: '#0284c7',
+          canopyGrad: ['#0284c7', '#082f49'],
+          glowFilter: 'rgba(0, 240, 255, 0.7)'
+        };
+
+        if (skinKey === 'red') {
+          cfg = {
+            hullMain: '#450a0a',
+            hullDark: '#1c0505',
+            hullLight: '#991b1b',
+            accent: '#ff4444',
+            accentGlow: '#f97316',
+            thrusterCore: '#fff7ed',
+            thrusterMid: '#ff5500',
+            thrusterOuter: '#b91c1c',
+            canopyGrad: ['#ef4444', '#450a0a'],
+            glowFilter: 'rgba(255, 68, 68, 0.7)'
+          };
+        } else if (skinKey === 'green') {
+          cfg = {
+            hullMain: '#064e3b',
+            hullDark: '#022c22',
+            hullLight: '#047857',
+            accent: '#05ffa1',
+            accentGlow: '#34d399',
+            thrusterCore: '#f0fdf4',
+            thrusterMid: '#05ffa1',
+            thrusterOuter: '#065f46',
+            canopyGrad: ['#10b981', '#064e3b'],
+            glowFilter: 'rgba(5, 255, 161, 0.7)'
+          };
+        }
+
+        return `
+          <svg viewBox="0 0 140 180" width="${size * 0.8}" height="${size}" xmlns="http://www.w3.org/2000/svg" class="filter drop-shadow-[0_8px_20px_${cfg.glowFilter}]">
+            <defs>
+              <linearGradient id="fuselageGrad_${skinKey}" x1="0%" y1="0%" x2="100%" y2="0%">
+                <stop offset="0%" stop-color="${cfg.hullDark}"/>
+                <stop offset="50%" stop-color="${cfg.hullLight}"/>
+                <stop offset="100%" stop-color="${cfg.hullDark}"/>
+              </linearGradient>
+              <linearGradient id="wingGrad_${skinKey}" x1="0%" y1="0%" x2="0%" y2="100%">
+                <stop offset="0%" stop-color="${cfg.hullLight}"/>
+                <stop offset="70%" stop-color="${cfg.hullMain}"/>
+                <stop offset="100%" stop-color="${cfg.hullDark}"/>
+              </linearGradient>
+              <linearGradient id="canopyGrad_${skinKey}" x1="0%" y1="0%" x2="0%" y2="100%">
+                <stop offset="0%" stop-color="#ffffff" stop-opacity="0.9"/>
+                <stop offset="25%" stop-color="${cfg.canopyGrad[0]}" stop-opacity="0.85"/>
+                <stop offset="100%" stop-color="${cfg.canopyGrad[1]}" stop-opacity="0.95"/>
+              </linearGradient>
+              <linearGradient id="thrusterPlume_${skinKey}" x1="0%" y1="0%" x2="0%" y2="100%">
+                <stop offset="0%" stop-color="${cfg.thrusterCore}"/>
+                <stop offset="35%" stop-color="${cfg.thrusterMid}"/>
+                <stop offset="85%" stop-color="${cfg.thrusterOuter}" stop-opacity="0.6"/>
+                <stop offset="100%" stop-color="${cfg.thrusterOuter}" stop-opacity="0"/>
+              </linearGradient>
+            </defs>
+
+            <!-- Thruster Plumes -->
+            <polygon points="44,142 51,142 58,142 54,178 51,170 48,178" fill="url(#thrusterPlume_${skinKey})" />
+            <polygon points="82,142 89,142 96,142 92,178 89,170 86,178" fill="url(#thrusterPlume_${skinKey})" />
+
+            <!-- Wings -->
+            <path d="M48 85 L10 132 L20 144 L48 136 Z" fill="url(#wingGrad_${skinKey})" stroke="${cfg.hullDark}" stroke-width="1.5"/>
+            <line x1="48" y1="85" x2="10" y2="132" stroke="${cfg.accent}" stroke-width="2.5" stroke-linecap="round"/>
+
+            <path d="M92 85 L130 132 L120 144 L92 136 Z" fill="url(#wingGrad_${skinKey})" stroke="${cfg.hullDark}" stroke-width="1.5"/>
+            <line x1="92" y1="85" x2="130" y2="132" stroke="${cfg.accent}" stroke-width="2.5" stroke-linecap="round"/>
+
+            <!-- Fuselage -->
+            <path d="M70 12 L84 45 L88 95 L84 136 L70 140 L56 136 L52 95 L56 45 Z" fill="url(#fuselageGrad_${skinKey})" stroke="${cfg.hullDark}" stroke-width="2"/>
+
+            <!-- "ALKABA" Brand Insignia on Fuselage -->
+            <text x="70" y="125" font-family="'Fredoka', sans-serif" font-weight="900" font-size="11" fill="${cfg.accent}" text-anchor="middle" letter-spacing="1">ALKABA</text>
+
+            <!-- Canopy -->
+            <path d="M70 42 C64 42 61 55 61 74 C61 93 64 102 70 102 C76 102 79 93 79 74 C79 55 76 42 70 42 Z" fill="url(#canopyGrad_${skinKey})" stroke="${cfg.accent}" stroke-width="1.5"/>
+            <circle cx="70" cy="9" r="2" fill="#ffffff"/>
+          </svg>
+        `;
+      },
+
+      // Centerpiece Artwork: Friendly 4-Armed Robot Waiter on Antigravity Repulsor Beam serving feast
+      getRobotWaiterSVG() {
+        return `
+          <svg viewBox="0 0 380 280" class="w-full h-full max-h-[280px] filter drop-shadow-[0_12px_30px_rgba(0,240,255,0.45)]" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <linearGradient id="roboChassisGrad" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0%" stop-color="#ffffff"/>
+                <stop offset="45%" stop-color="#e2e8f0"/>
+                <stop offset="85%" stop-color="#94a3b8"/>
+                <stop offset="100%" stop-color="#64748b"/>
+              </linearGradient>
+              <linearGradient id="traySilverGrad" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0%" stop-color="#ffffff"/>
+                <stop offset="40%" stop-color="#cbd5e1"/>
+                <stop offset="100%" stop-color="#64748b"/>
+              </linearGradient>
+              <radialGradient id="antigravBeam" cx="50%" cy="40%" r="60%">
+                <stop offset="0%" stop-color="#00f0ff" stop-opacity="0.95"/>
+                <stop offset="50%" stop-color="#b026ff" stop-opacity="0.6"/>
+                <stop offset="100%" stop-color="#b026ff" stop-opacity="0"/>
+              </radialGradient>
+              <radialGradient id="roboEyeLens" cx="35%" cy="35%" r="65%">
+                <stop offset="0%" stop-color="#67e8f9"/>
+                <stop offset="40%" stop-color="#06b6d4"/>
+                <stop offset="80%" stop-color="#0891b2"/>
+                <stop offset="100%" stop-color="#0e7490"/>
+              </radialGradient>
+            </defs>
+
+            <!-- Antigravity Repulsor Beam & Energy Rings -->
+            <ellipse cx="190" cy="255" rx="75" ry="14" fill="url(#antigravBeam)"/>
+            <ellipse cx="190" cy="250" rx="45" ry="8" fill="#00f0ff" opacity="0.85"/>
+            <ellipse cx="190" cy="242" rx="25" ry="4" fill="#ffffff" opacity="0.9"/>
+
+            <!-- Antigravity Thruster Emitter Base -->
+            <path d="M172 215 L208 215 L202 238 L178 238 Z" fill="#334155" stroke="#1e293b" stroke-width="2"/>
+            <ellipse cx="190" cy="238" rx="12" ry="4" fill="#00f0ff"/>
+
+            <!-- ================= ARM 1 (Top Left): Hot Pepperoni Pizza 🍕 ================= -->
+            <g class="animate-bounce" style="animation-duration: 2.8s;">
+              <path d="M165 130 Q110 100 70 76" stroke="#94a3b8" stroke-width="8" stroke-linecap="round" fill="none"/>
+              <circle cx="115" cy="108" r="6" fill="#475569"/>
+              <circle cx="70" cy="76" r="6" fill="#475569"/>
+              <!-- Silver Serving Tray -->
+              <ellipse cx="65" cy="72" rx="42" ry="11" fill="url(#traySilverGrad)" stroke="#475569" stroke-width="1.8"/>
+              <!-- Pizza Slice -->
+              <polygon points="65,50 42,69 88,69" fill="#f59e0b" stroke="#d97706" stroke-width="1"/>
+              <path d="M42 69 Q65 74 88 69" stroke="#b45309" stroke-width="4.5" fill="none"/>
+              <!-- Pepperoni slices -->
+              <circle cx="65" cy="60" r="3.8" fill="#dc2626"/>
+              <circle cx="55" cy="65" r="3.2" fill="#dc2626"/>
+              <circle cx="75" cy="65" r="3.2" fill="#dc2626"/>
+              <!-- Melted cheese drops -->
+              <circle cx="62" cy="56" r="1.6" fill="#fef08a"/>
+              <circle cx="70" cy="62" r="1.6" fill="#fef08a"/>
+            </g>
+
+            <!-- ================= ARM 2 (Bottom Left): Chilled Juice 🧃 ================= -->
+            <g class="animate-bounce" style="animation-duration: 3.2s; animation-delay: 0.4s;">
+              <path d="M165 165 Q115 170 75 180" stroke="#94a3b8" stroke-width="8" stroke-linecap="round" fill="none"/>
+              <circle cx="120" cy="168" r="6" fill="#475569"/>
+              <circle cx="75" cy="180" r="6" fill="#475569"/>
+              <!-- Silver Serving Tray -->
+              <ellipse cx="70" cy="188" rx="38" ry="10" fill="url(#traySilverGrad)" stroke="#475569" stroke-width="1.8"/>
+              <!-- Chilled Juice Box / Glass with Straw -->
+              <rect x="60" y="152" width="20" height="30" rx="3" fill="#00f0ff" opacity="0.88" stroke="#38bdf8" stroke-width="1.5"/>
+              <rect x="62" y="162" width="16" height="18" rx="2" fill="#ec4899"/>
+              <!-- Bent drinking straw -->
+              <path d="M70 156 L72 138 L80 134" stroke="#facc15" stroke-width="3" stroke-linecap="round" fill="none"/>
+              <!-- Lemon wedge garnish -->
+              <circle cx="60" cy="154" r="5" fill="#facc15" stroke="#ca8a04" stroke-width="1"/>
+            </g>
+
+            <!-- ================= ARM 3 (Top Right): Galaxy Burger 🍔 ================= -->
+            <g class="animate-bounce" style="animation-duration: 3s; animation-delay: 0.2s;">
+              <path d="M215 130 Q270 100 310 76" stroke="#94a3b8" stroke-width="8" stroke-linecap="round" fill="none"/>
+              <circle cx="265" cy="108" r="6" fill="#475569"/>
+              <circle cx="310" cy="76" r="6" fill="#475569"/>
+              <!-- Silver Serving Tray -->
+              <ellipse cx="315" cy="72" rx="42" ry="11" fill="url(#traySilverGrad)" stroke="#475569" stroke-width="1.8"/>
+              <!-- Top Brioche Bun -->
+              <path d="M298 62 C298 51 332 51 332 62 Z" fill="#d97706"/>
+              <!-- Sesame seeds -->
+              <circle cx="310" cy="56" r="1" fill="#fef08a"/>
+              <circle cx="319" cy="56" r="1" fill="#fef08a"/>
+              <circle cx="314" cy="59" r="1" fill="#fef08a"/>
+              <!-- Crisp Lettuce & Melted Cheese -->
+              <rect x="296" y="62" width="38" height="2.5" fill="#22c55e" rx="1"/>
+              <polygon points="306,64 324,64 315,67" fill="#facc15"/>
+              <!-- Savory Meat Patty -->
+              <rect x="297" y="64.5" width="36" height="4.5" rx="2" fill="#78350f"/>
+              <!-- Bottom Bun -->
+              <rect x="298" y="69" width="34" height="3" rx="1.5" fill="#d97706"/>
+            </g>
+
+            <!-- ================= ARM 4 (Bottom Right): Ice Cream Sundae 🍨 ================= -->
+            <g class="animate-bounce" style="animation-duration: 2.7s; animation-delay: 0.6s;">
+              <path d="M215 165 Q265 170 305 180" stroke="#94a3b8" stroke-width="8" stroke-linecap="round" fill="none"/>
+              <circle cx="260" cy="168" r="6" fill="#475569"/>
+              <circle cx="305" cy="180" r="6" fill="#475569"/>
+              <!-- Silver Serving Tray -->
+              <ellipse cx="310" cy="188" rx="38" ry="10" fill="url(#traySilverGrad)" stroke="#475569" stroke-width="1.8"/>
+              <!-- Dessert Glass Goblet -->
+              <path d="M300 174 Q310 186 320 174 Z" fill="#e2e8f0" stroke="#94a3b8" stroke-width="1.4"/>
+              <line x1="310" y1="180" x2="310" y2="186" stroke="#94a3b8" stroke-width="3"/>
+              <!-- Ice Cream Scoops (Pink Berry, Cyan Blue, Vanilla) -->
+              <circle cx="305" cy="170" r="6" fill="#ff2a85"/>
+              <circle cx="315" cy="170" r="6" fill="#38bdf8"/>
+              <circle cx="310" cy="163" r="5" fill="#fef08a"/>
+              <!-- Glazed Cherry on Top -->
+              <circle cx="310" cy="156" r="3" fill="#dc2626"/>
+              <path d="M310 154 Q314 150 318 151" stroke="#15803d" stroke-width="1.2" fill="none"/>
+            </g>
+
+            <!-- Robot Body / Fuselage -->
+            <rect x="156" y="115" width="68" height="102" rx="26" fill="url(#roboChassisGrad)" stroke="#475569" stroke-width="3"/>
+            <!-- Waiter Vest / Chest Armor -->
+            <rect x="166" y="132" width="48" height="58" rx="10" fill="#0f172a" stroke="#00f0ff" stroke-width="1.6"/>
+            <!-- Cute Waiter Bowtie -->
+            <polygon points="180,122 190,126 180,130" fill="#f59e0b"/>
+            <polygon points="200,122 190,126 200,130" fill="#f59e0b"/>
+            <circle cx="190" cy="126" r="3" fill="#ffffff"/>
+
+            <!-- Heartbeat / Energy Wave Meter -->
+            <rect x="172" y="166" width="36" height="16" rx="4" fill="#020617" stroke="#05ffa1" stroke-width="1"/>
+            <path d="M175 174 L180 174 L183 169 L187 179 L190 171 L193 175 L204 175" stroke="#05ffa1" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+
+            <!-- Robot Neck -->
+            <rect x="182" y="104" width="16" height="13" rx="2" fill="#64748b"/>
+
+            <!-- Robot Head -->
+            <rect x="150" y="44" width="80" height="62" rx="24" fill="url(#roboChassisGrad)" stroke="#475569" stroke-width="3"/>
+
+            <!-- Top Antenna & Pulsing Transmitter Orb -->
+            <line x1="190" y1="44" x2="190" y2="24" stroke="#64748b" stroke-width="3.5"/>
+            <circle cx="190" cy="20" r="8" fill="#ffd700" stroke="#ca8a04" stroke-width="2"/>
+            <circle cx="190" cy="20" r="3" fill="#ffffff"/>
+
+            <!-- Side Audio Ear Sensors -->
+            <rect x="142" y="62" width="9" height="22" rx="3" fill="#00f0ff" stroke="#475569" stroke-width="1.5"/>
+            <rect x="229" y="62" width="9" height="22" rx="3" fill="#00f0ff" stroke="#475569" stroke-width="1.5"/>
+
+            <!-- Large Single Cyclops Screen Lens (as illustrated in image_2.png) -->
+            <circle cx="190" cy="74" r="23" fill="#090d16" stroke="#00f0ff" stroke-width="2.5"/>
+            <circle cx="190" cy="74" r="17" fill="url(#roboEyeLens)"/>
+            <circle cx="190" cy="74" r="8" fill="#083344"/>
+            <circle cx="186" cy="69" r="3.5" fill="#ffffff"/>
+            <circle cx="194" cy="77" r="1.5" fill="#ffffff"/>
+
+            <!-- Digital Rosy Cheeks -->
+            <circle cx="160" cy="92" r="3" fill="#ff2a85" opacity="0.85"/>
+            <circle cx="220" cy="92" r="3" fill="#ff2a85" opacity="0.85"/>
+
+            <!-- Happy Smile -->
+            <path d="M182 92 Q190 98 198 92" stroke="#05ffa1" stroke-width="2.5" stroke-linecap="round" fill="none"/>
+          </svg>
+        `;
+      }
+    };
+
+    const GAME_CONFIG = {
+      targetScore: 1000,
+      baseSpeed: 5,
+      handlingMultiplier: {
+        patrick: 1.3,
+        phoebe: 1.0,
+        alex: 1.0
+      },
+      speedMultiplier: {
+        patrick: 1.0,
+        phoebe: 1.3,
+        alex: 1.0
+      },
+      boostMultiplier: {
+        patrick: 1.0,
+        phoebe: 1.0,
+        alex: 1.2
+      }
+    };
+
+    class SpacePlayer {
+      constructor(id, name, charKey, skinKey, laneBounds) {
+        this.id = id;
+        this.name = name;
+        this.charKey = charKey;
+        this.skinKey = skinKey;
+        this.bounds = laneBounds;
+        this.x = (laneBounds.minX + laneBounds.maxX) / 2;
+        this.y = 0;
+        this.width = 52;
+        this.height = 76;
+        this.score = 0;
+        this.fuel = 100;
+        this.moveLeft = false;
+        this.moveRight = false;
+        this.bankAngle = 0;
+        this.particles = [];
+        this.invulnerableTimer = 0;
+      }
+
+      get agility() {
+        return 6.5 * (GAME_CONFIG.handlingMultiplier[this.charKey] || 1.0);
+      }
+
+      update(dt) {
+        const targetBank = this.moveLeft ? -0.22 : (this.moveRight ? 0.22 : 0);
+        this.bankAngle += (targetBank - this.bankAngle) * 0.18;
+
+        if (this.moveLeft) {
+          this.x -= this.agility;
+        }
+        if (this.moveRight) {
+          this.x += this.agility;
+        }
+
+        const halfW = this.width / 2;
+        if (this.x - halfW < this.bounds.minX) {
+          this.x = this.bounds.minX + halfW;
+        }
+        if (this.x + halfW > this.bounds.maxX) {
+          this.x = this.bounds.maxX - halfW;
+        }
+
+        this.fuel = Math.max(0, this.fuel - 0.02);
+
+        if (this.invulnerableTimer > 0) {
+          this.invulnerableTimer -= dt;
+        }
+
+        let flameColor = '#00f0ff';
+        let coreColor = '#ffffff';
+        if (this.skinKey === 'red') {
+          flameColor = '#ff5500';
+          coreColor = '#ffedd5';
+        } else if (this.skinKey === 'green') {
+          flameColor = '#05ffa1';
+          coreColor = '#ecfdf5';
+        }
+
+        const nozzles = [-12, 12];
+        for (const offset of nozzles) {
+          if (Math.random() < 0.85) {
+            this.particles.push({
+              x: this.x + offset * Math.cos(this.bankAngle) + (Math.random() * 4 - 2),
+              y: this.y + this.height * 0.44 + (Math.random() * 3),
+              vx: (Math.random() - 0.5) * 1.8 + (-this.bankAngle * 3),
+              vy: 5 + Math.random() * 4.5,
+              radius: 3.5 + Math.random() * 3,
+              alpha: 0.9,
+              color: Math.random() < 0.35 ? coreColor : flameColor
+            });
+          }
+        }
+
+        for (let i = this.particles.length - 1; i >= 0; i--) {
+          const p = this.particles[i];
+          p.x += p.vx;
+          p.y += p.vy;
+          p.alpha -= 0.055;
+          p.radius *= 0.94;
+          if (p.alpha <= 0) {
+            this.particles.splice(i, 1);
+          }
+        }
+      }
+
+      draw(ctx) {
+        for (const p of this.particles) {
+          ctx.save();
+          ctx.globalAlpha = p.alpha;
+          ctx.fillStyle = p.color;
+          ctx.shadowColor = p.color;
+          ctx.shadowBlur = 8;
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.restore();
+        }
+
+        if (this.invulnerableTimer > 0 && Math.floor(Date.now() / 80) % 2 === 0) {
+          return;
+        }
+
+        ctx.save();
+        ctx.translate(this.x, this.y);
+        ctx.rotate(this.bankAngle);
+
+        let hullMain = '#1e293b';
+        let hullDark = '#0f172a';
+        let hullLight = '#334155';
+        let neonAccent = '#00f0ff';
+        let canopyColor = '#38bdf8';
+
+        if (this.skinKey === 'red') {
+          hullMain = '#450a0a';
+          hullDark = '#1c0505';
+          hullLight = '#991b1b';
+          neonAccent = '#ff4444';
+          canopyColor = '#f87171';
+        } else if (this.skinKey === 'green') {
+          hullMain = '#064e3b';
+          hullDark = '#022c22';
+          hullLight = '#047857';
+          neonAccent = '#05ffa1';
+          canopyColor = '#34d399';
+        }
+
+        // Wings
+        ctx.fillStyle = hullMain;
+        ctx.strokeStyle = hullDark;
+        ctx.lineWidth = 1.8;
+
+        ctx.beginPath();
+        ctx.moveTo(-this.width * 0.28, -this.height * 0.05);
+        ctx.lineTo(-this.width * 0.72, this.height * 0.32);
+        ctx.lineTo(-this.width * 0.62, this.height * 0.42);
+        ctx.lineTo(-this.width * 0.25, this.height * 0.36);
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+
+        ctx.beginPath();
+        ctx.moveTo(this.width * 0.28, -this.height * 0.05);
+        ctx.lineTo(this.width * 0.72, this.height * 0.32);
+        ctx.lineTo(this.width * 0.62, this.height * 0.42);
+        ctx.lineTo(this.width * 0.25, this.height * 0.36);
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+
+        ctx.strokeStyle = neonAccent;
+        ctx.lineWidth = 2.2;
+        ctx.shadowColor = neonAccent;
+        ctx.shadowBlur = 10;
+
+        ctx.beginPath();
+        ctx.moveTo(-this.width * 0.28, -this.height * 0.05);
+        ctx.lineTo(-this.width * 0.72, this.height * 0.32);
+        ctx.stroke();
+
+        ctx.beginPath();
+        ctx.moveTo(this.width * 0.28, -this.height * 0.05);
+        ctx.lineTo(this.width * 0.72, this.height * 0.32);
+        ctx.stroke();
+
+        ctx.shadowBlur = 0;
+
+        // Exhaust Nozzles
+        ctx.fillStyle = '#0f172a';
+        ctx.strokeStyle = neonAccent;
+        ctx.lineWidth = 1.5;
+        ctx.fillRect(-17, this.height * 0.34, 10, 8);
+        ctx.strokeRect(-17, this.height * 0.34, 10, 8);
+        ctx.fillRect(7, this.height * 0.34, 10, 8);
+        ctx.strokeRect(7, this.height * 0.34, 10, 8);
+
+        // Fuselage
+        ctx.fillStyle = hullLight;
+        ctx.strokeStyle = hullDark;
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(0, -this.height * 0.52);
+        ctx.lineTo(this.width * 0.22, -this.height * 0.22);
+        ctx.lineTo(this.width * 0.28, this.height * 0.24);
+        ctx.lineTo(this.width * 0.16, this.height * 0.44);
+        ctx.lineTo(-this.width * 0.16, this.height * 0.44);
+        ctx.lineTo(-this.width * 0.28, this.height * 0.24);
+        ctx.lineTo(-this.width * 0.22, -this.height * 0.22);
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+
+        // Insignia
+        ctx.fillStyle = neonAccent;
+        ctx.font = 'bold 8px Fredoka';
+        ctx.textAlign = 'center';
+        ctx.fillText('ALKABA', 0, this.height * 0.32);
+
+        // Cockpit
+        const canopyGrad = ctx.createLinearGradient(0, -this.height * 0.22, 0, this.height * 0.12);
+        canopyGrad.addColorStop(0, '#ffffff');
+        canopyGrad.addColorStop(0.35, canopyColor);
+        canopyGrad.addColorStop(1, '#090d16');
+
+        ctx.fillStyle = canopyGrad;
+        ctx.strokeStyle = neonAccent;
+        ctx.lineWidth = 1.4;
+        ctx.beginPath();
+        ctx.ellipse(0, -this.height * 0.04, this.width * 0.13, this.height * 0.18, 0, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.stroke();
+
+        if (this.invulnerableTimer > 0) {
+          ctx.strokeStyle = 'rgba(0, 240, 255, 0.7)';
+          ctx.lineWidth = 2;
+          ctx.shadowColor = '#00f0ff';
+          ctx.shadowBlur = 15;
+          ctx.beginPath();
+          ctx.arc(0, 0, this.height * 0.58, 0, Math.PI * 2);
+          ctx.stroke();
+        }
+
+        ctx.restore();
+      }
+    }
+
+    class SpaceCanvasGame {
+      constructor() {
+        this.canvas = document.getElementById('gameCanvas');
+        this.ctx = this.canvas.getContext('2d');
+        
+        this.mode = 'solo';
+        this.players = [];
+        this.starsBackground = [];
+        this.fallingEntities = [];
+        
+        this.isRunning = false;
+        this.isQuizPaused = false;
+        this.activeQuizPlayer = null;
+
+        this.cameraShake = 0;
+        this.lastTime = performance.now();
+        this.spawnTimer = 0;
+
+        this.setupSelectionState();
+        this.initCanvasSize();
+        this.initStarfield();
+        this.attachEventListeners();
+      }
+
+      setupSelectionState() {
+        this.selection = {
+          currentStep: 'char',
+          selectingPlayer: 1,
+          p1Char: 'patrick',
+          p1Skin: 'blue',
+          p2Char: 'phoebe',
+          p2Skin: 'red'
+        };
+      }
+
+      initCanvasSize() {
+        this.width = window.innerWidth;
+        this.height = window.innerHeight;
+        this.canvas.width = this.width;
+        this.canvas.height = this.height;
+
+        if (this.players.length > 0) {
+          this.recalculateLanes();
+        }
+      }
+
+      recalculateLanes() {
+        if (this.mode === 'solo') {
+          const laneW = Math.min(this.width * 0.85, 700);
+          const minX = (this.width - laneW) / 2;
+          const maxX = minX + laneW;
+          if (this.players[0]) {
+            this.players[0].bounds = { minX, maxX };
+            this.players[0].y = this.height - 110;
+          }
+        } else {
+          const half = this.width / 2;
+          const p1Min = 20;
+          const p1Max = half - 20;
+          const p2Min = half + 20;
+          const p2Max = this.width - 20;
+
+          if (this.players[0]) {
+            this.players[0].bounds = { minX: p1Min, maxX: p1Max };
+            this.players[0].y = this.height - 110;
+          }
+          if (this.players[1]) {
+            this.players[1].bounds = { minX: p2Min, maxX: p2Max };
+            this.players[1].y = this.height - 110;
+          }
+        }
+      }
+
+      initStarfield() {
+        this.starsBackground = [];
+        const count = Math.floor((this.width * this.height) / 5000);
+        for (let i = 0; i < count; i++) {
+          this.starsBackground.push({
+            x: Math.random() * this.width,
+            y: Math.random() * this.height,
+            size: Math.random() * 2 + 0.5,
+            speed: Math.random() * 2.5 + 0.8,
+            color: ['#ffffff', '#bae6fd', '#fed7aa', '#fbcfe8'][Math.floor(Math.random() * 4)]
+          });
+        }
+      }
+
+      startSession() {
+        this.players = [];
+        this.fallingEntities = [];
+        this.isQuizPaused = false;
+        this.activeQuizPlayer = null;
+        this.cameraShake = 0;
+
+        if (this.mode === 'solo') {
+          const laneW = Math.min(this.width * 0.85, 700);
+          const minX = (this.width - laneW) / 2;
+          const maxX = minX + laneW;
+          const p1 = new SpacePlayer(1, this.selection.p1Char.toUpperCase(), this.selection.p1Char, this.selection.p1Skin, { minX, maxX });
+          p1.y = this.height - 110;
+          this.players.push(p1);
+        } else {
+          const half = this.width / 2;
+          const p1 = new SpacePlayer(1, this.selection.p1Char.toUpperCase(), this.selection.p1Char, this.selection.p1Skin, { minX: 20, maxX: half - 20 });
+          const p2 = new SpacePlayer(2, this.selection.p2Char.toUpperCase(), this.selection.p2Char, this.selection.p2Skin, { minX: half + 20, maxX: this.width - 20 });
+          p1.y = this.height - 110;
+          p2.y = this.height - 110;
+          this.players.push(p1, p2);
+        }
+
+        this.updateHUDDisplay();
+        this.isRunning = true;
+        this.lastTime = performance.now();
+        soundEngine.startBGM();
+      }
+
+      spawnEntity() {
+        const isComet = Math.random() < 0.65;
+        let targetLane = 0;
+        if (this.mode === 'duel') {
+          targetLane = Math.random() < 0.5 ? 0 : 1;
+        }
+
+        const player = this.players[targetLane];
+        if (!player) return;
+
+        const bounds = player.bounds;
+        const xPos = bounds.minX + 30 + Math.random() * (bounds.maxX - bounds.minX - 60);
+
+        if (isComet) {
+          this.fallingEntities.push({
+            type: 'comet',
+            x: xPos,
+            y: -50,
+            radius: 22 + Math.random() * 8,
+            speed: (4.5 + Math.random() * 3) * (GAME_CONFIG.speedMultiplier[player.charKey] || 1.0),
+            angle: Math.random() * Math.PI * 2,
+            rotSpeed: (Math.random() - 0.5) * 0.035,
+            flameAnim: Math.random() * 10,
+            sparks: [],
+            laneIndex: targetLane
+          });
+        } else {
+          const randomItem = VOCAB_DATASET[Math.floor(Math.random() * VOCAB_DATASET.length)];
+          this.fallingEntities.push({
+            type: 'star',
+            x: xPos,
+            y: -40,
+            radius: 22,
+            speed: 3.5 + Math.random() * 2,
+            vocabItem: randomItem,
+            pulse: 0,
+            laneIndex: targetLane
+          });
+        }
+      }
+
+      checkCollisions() {
+        for (let i = this.fallingEntities.length - 1; i >= 0; i--) {
+          const entity = this.fallingEntities[i];
+          const player = this.players[entity.laneIndex];
+          if (!player) continue;
+
+          const dx = player.x - entity.x;
+          const dy = player.y - entity.y;
+          const distance = Math.hypot(dx, dy);
+
+          if (distance < entity.radius + player.width * 0.42) {
+            if (entity.type === 'comet') {
+              if (player.invulnerableTimer <= 0) {
+                player.score = Math.max(0, player.score - 50);
+                player.fuel = Math.max(0, player.fuel - 15);
+                player.invulnerableTimer = 1.2;
+                this.cameraShake = 16;
+                soundEngine.playCometHit();
+              }
+              this.fallingEntities.splice(i, 1);
+            } else if (entity.type === 'star') {
+              soundEngine.playStarCollect();
+              this.fallingEntities.splice(i, 1);
+              this.triggerVocabQuiz(player, entity.vocabItem);
+              break;
+            }
+          }
+        }
+      }
+
+      triggerVocabQuiz(player, targetVocab) {
+        this.isQuizPaused = true;
+        this.activeQuizPlayer = player;
+
+        const modal = document.getElementById('modalVocabQuiz');
+        const pBadge = document.getElementById('quizPlayerBadge');
+        const catText = document.getElementById('quizCategoryText');
+        const emoji = document.getElementById('quizEmoji');
+        const optionsContainer = document.getElementById('quizOptionsContainer');
+        const feedback = document.getElementById('quizFeedback');
+
+        pBadge.innerText = `Player ${player.id} (${player.name})`;
+        pBadge.className = player.id === 1 
+          ? "px-3 py-1 rounded-full bg-neon-cyan/20 border border-neon-cyan/40 text-neon-cyan text-xs font-bold uppercase"
+          : "px-3 py-1 rounded-full bg-neon-pink/20 border border-neon-pink/40 text-neon-pink text-xs font-bold uppercase";
+
+        catText.innerText = targetVocab.category;
+        emoji.innerText = targetVocab.emoji;
+        feedback.innerText = '';
+        feedback.className = 'h-6 text-sm font-fredoka font-bold mt-2 text-transparent';
+
+        const distractors = VOCAB_DATASET
+          .filter(item => item.word !== targetVocab.word)
+          .sort(() => 0.5 - Math.random())
+          .slice(0, 3)
+          .map(item => item.word);
+
+        const allChoices = [...distractors, targetVocab.word].sort(() => 0.5 - Math.random());
+
+        optionsContainer.innerHTML = '';
+        allChoices.forEach(choice => {
+          const btn = document.createElement('button');
+          btn.className = "w-full min-h-[58px] py-3.5 px-4 rounded-2xl bg-space-800 border-2 border-slate-700 hover:border-neon-gold text-white font-fredoka font-bold text-base sm:text-lg tracking-wide transition active:scale-95 shadow-md flex items-center justify-center gap-2 touch-manipulation cursor-pointer";
+          btn.innerHTML = `<span>${choice.toUpperCase()}</span>`;
+          
+          btn.onclick = () => {
+            if (navigator.vibrate) {
+              try { navigator.vibrate(choice === targetVocab.word ? [40, 30, 60] : 100); } catch(e) {}
+            }
+            if (choice === targetVocab.word) {
+              btn.classList.remove('border-slate-700', 'bg-space-800');
+              btn.classList.add('border-neon-emerald', 'bg-emerald-600/30', 'text-neon-emerald');
+              feedback.innerText = '✨ EXCELLENT! +100 PTS & FULL REFUEL! ✨';
+              feedback.className = 'h-6 text-sm font-fredoka font-bold mt-2 text-neon-emerald animate-pulse';
+              soundEngine.playQuizCorrect();
+
+              const boost = GAME_CONFIG.boostMultiplier[player.charKey] || 1.0;
+              player.score += Math.round(100 * boost);
+              player.fuel = 100;
+
+              setTimeout(() => {
+                modal.classList.add('hidden');
+                this.isQuizPaused = false;
+                this.checkVictoryCondition();
+              }, 1100);
+            } else {
+              btn.classList.remove('border-slate-700', 'bg-space-800');
+              btn.classList.add('border-red-500', 'bg-red-600/30', 'text-red-400');
+              feedback.innerText = `❌ Try again! That item is ${targetVocab.word.toUpperCase()}`;
+              feedback.className = 'h-6 text-sm font-fredoka font-bold mt-2 text-red-400';
+              soundEngine.playQuizWrong();
+              this.cameraShake = 8;
+
+              setTimeout(() => {
+                modal.classList.add('hidden');
+                this.isQuizPaused = false;
+              }, 1300);
+            }
+          };
+          optionsContainer.appendChild(btn);
+        });
+
+        modal.classList.remove('hidden');
+      }
+
+      checkVictoryCondition() {
+        for (const p of this.players) {
+          if (p.score >= GAME_CONFIG.targetScore) {
+            this.triggerVictoryScreen();
+            return;
+          }
+        }
+      }
+
+      triggerVictoryScreen() {
+        this.isRunning = false;
+        soundEngine.stopBGM();
+
+        const screenGame = document.getElementById('screenGameplay');
+        const screenVictory = document.getElementById('screenVictory');
+        screenGame.classList.add('hidden');
+        screenVictory.classList.remove('hidden');
+
+        // Centerpiece: Render the animated 4-armed Robot Waiter on antigravity repulsor beam serving feast
+        const robotCont = document.getElementById('robotWaiterContainer');
+        robotCont.innerHTML = SVG_FACTORY.getRobotWaiterSVG();
+
+        // Pilot scorecards
+        const p1Avatar = document.getElementById('victoryP1Avatar');
+        p1Avatar.innerHTML = SVG_FACTORY.getAstronautSVG(this.players[0].charKey, 52);
+        document.getElementById('victoryP1Name').innerText = this.players[0].name;
+        document.getElementById('victoryP1Score').innerText = `${this.players[0].score} PTS`;
+
+        const p2Card = document.getElementById('victoryP2Card');
+        if (this.mode === 'duel' && this.players[1]) {
+          p2Card.classList.remove('hidden');
+          const p2Avatar = document.getElementById('victoryP2Avatar');
+          p2Avatar.innerHTML = SVG_FACTORY.getAstronautSVG(this.players[1].charKey, 52);
+          document.getElementById('victoryP2Name').innerText = this.players[1].name;
+          document.getElementById('victoryP2Score').innerText = `${this.players[1].score} PTS`;
+        } else {
+          p2Card.classList.add('hidden');
+        }
+
+        soundEngine.playQuizCorrect();
+      }
+
+      updateHUDDisplay() {
+        const p1 = this.players[0];
+        if (p1) {
+          document.getElementById('p1HudName').innerText = `P1: ${p1.name}`;
+          document.getElementById('p1HudScore').innerText = `${p1.score} PTS`;
+          document.getElementById('p1FuelBar').style.width = `${p1.fuel}%`;
+          document.getElementById('p1FuelText').innerText = `${Math.round(p1.fuel)}%`;
+          document.getElementById('p1HudAvatar').innerHTML = SVG_FACTORY.getAstronautSVG(p1.charKey, 40);
+        }
+
+        const p2Hud = document.getElementById('p2Hud');
+        const p2Touch = document.getElementById('p2TouchControls');
+
+        if (this.mode === 'duel' && this.players[1]) {
+          p2Hud.classList.remove('hidden');
+          p2Touch.classList.remove('hidden');
+          const p2 = this.players[1];
+          document.getElementById('p2HudName').innerText = `P2: ${p2.name}`;
+          document.getElementById('p2HudScore').innerText = `${p2.score} PTS`;
+          document.getElementById('p2FuelBar').style.width = `${p2.fuel}%`;
+          document.getElementById('p2FuelText').innerText = `${Math.round(p2.fuel)}%`;
+          document.getElementById('p2HudAvatar').innerHTML = SVG_FACTORY.getAstronautSVG(p2.charKey, 40);
+        } else {
+          p2Hud.classList.add('hidden');
+          p2Touch.classList.add('hidden');
+        }
+      }
+
+      render() {
+        const now = performance.now();
+        const dt = Math.min((now - this.lastTime) / 1000, 0.1);
+        this.lastTime = now;
+
+        this.ctx.save();
+        if (this.cameraShake > 0) {
+          const shakeX = (Math.random() - 0.5) * this.cameraShake;
+          const shakeY = (Math.random() - 0.5) * this.cameraShake;
+          this.ctx.translate(shakeX, shakeY);
+          this.cameraShake = Math.max(0, this.cameraShake - 0.8);
+        }
+
+        const bgGrad = this.ctx.createLinearGradient(0, 0, 0, this.height);
+        bgGrad.addColorStop(0, '#060614');
+        bgGrad.addColorStop(0.6, '#0d0e2e');
+        bgGrad.addColorStop(1, '#151745');
+        this.ctx.fillStyle = bgGrad;
+        this.ctx.fillRect(0, 0, this.width, this.height);
+
+        for (const star of this.starsBackground) {
+          if (!this.isQuizPaused) {
+            star.y += star.speed;
+            if (star.y > this.height) {
+              star.y = 0;
+              star.x = Math.random() * this.width;
+            }
+          }
+          this.ctx.fillStyle = star.color;
+          this.ctx.beginPath();
+          this.ctx.arc(star.x, star.y, star.size, 0, Math.PI * 2);
+          this.ctx.fill();
+        }
+
+        this.drawLanes();
+
+        if (this.isRunning) {
+          if (!this.isQuizPaused) {
+            this.spawnTimer += dt;
+            const spawnInterval = this.mode === 'duel' ? 0.9 : 1.2;
+            if (this.spawnTimer > spawnInterval) {
+              this.spawnEntity();
+              this.spawnTimer = 0;
+            }
+          }
+
+          for (let i = this.fallingEntities.length - 1; i >= 0; i--) {
+            const entity = this.fallingEntities[i];
+            if (!this.isQuizPaused) {
+              entity.y += entity.speed;
+              if (entity.type === 'comet') {
+                entity.angle += entity.rotSpeed;
+                entity.flameAnim = (entity.flameAnim || 0) + 0.18;
+
+                if (Math.random() < 0.65) {
+                  if (!entity.sparks) entity.sparks = [];
+                  entity.sparks.push({
+                    x: (Math.random() - 0.5) * entity.radius * 1.2,
+                    y: -entity.radius * 0.4 - Math.random() * entity.radius * 0.8,
+                    vx: (Math.random() - 0.5) * 2.2,
+                    vy: -(3.5 + Math.random() * 4),
+                    radius: 2.2 + Math.random() * 3.2,
+                    alpha: 1,
+                    color: Math.random() < 0.45 ? '#fde047' : (Math.random() < 0.75 ? '#ff7a00' : '#ff2a55')
+                  });
+                }
+
+                if (entity.sparks) {
+                  for (let s = entity.sparks.length - 1; s >= 0; s--) {
+                    const sp = entity.sparks[s];
+                    sp.x += sp.vx;
+                    sp.y += sp.vy;
+                    sp.alpha -= 0.055;
+                    sp.radius *= 0.94;
+                    if (sp.alpha <= 0) {
+                      entity.sparks.splice(s, 1);
+                    }
+                  }
+                }
+              }
+            }
+
+            this.drawEntity(entity);
+
+            if (entity.y - entity.radius > this.height) {
+              this.fallingEntities.splice(i, 1);
+            }
+          }
+
+          for (const player of this.players) {
+            if (!this.isQuizPaused) {
+              player.update(dt);
+            }
+            player.draw(this.ctx);
+          }
+
+          if (!this.isQuizPaused) {
+            this.checkCollisions();
+            this.updateHUDDisplay();
+            this.checkVictoryCondition();
+          }
+        }
+
+        this.ctx.restore();
+        requestAnimationFrame(() => this.render());
+      }
+
+      drawLanes() {
+        this.ctx.save();
+        if (this.mode === 'solo') {
+          const p = this.players[0];
+          if (p) {
+            this.ctx.strokeStyle = 'rgba(0, 240, 255, 0.25)';
+            this.ctx.lineWidth = 2;
+            this.ctx.setLineDash([12, 10]);
+            this.ctx.beginPath();
+            this.ctx.moveTo(p.bounds.minX, 0);
+            this.ctx.lineTo(p.bounds.minX, this.height);
+            this.ctx.moveTo(p.bounds.maxX, 0);
+            this.ctx.lineTo(p.bounds.maxX, this.height);
+            this.ctx.stroke();
+            this.ctx.setLineDash([]);
+          }
+        } else {
+          const half = this.width / 2;
+          this.ctx.strokeStyle = 'rgba(176, 38, 255, 0.5)';
+          this.ctx.lineWidth = 3;
+          this.ctx.setLineDash([15, 12]);
+          this.ctx.beginPath();
+          this.ctx.moveTo(half, 0);
+          this.ctx.lineTo(half, this.height);
+          this.ctx.stroke();
+          this.ctx.setLineDash([]);
+        }
+        this.ctx.restore();
+      }
+
+      drawEntity(entity) {
+        this.ctx.save();
+        this.ctx.translate(entity.x, entity.y);
+
+        if (entity.type === 'comet') {
+          const t = entity.flameAnim || 0;
+          const r = entity.radius;
+          const tailLen = r * 3.8;
+
+          // Sparks
+          if (entity.sparks) {
+            for (const sp of entity.sparks) {
+              this.ctx.save();
+              this.ctx.globalAlpha = sp.alpha;
+              this.ctx.fillStyle = sp.color;
+              this.ctx.shadowColor = sp.color;
+              this.ctx.shadowBlur = 8;
+              this.ctx.beginPath();
+              this.ctx.arc(sp.x, sp.y, Math.max(0.5, sp.radius), 0, Math.PI * 2);
+              this.ctx.fill();
+              this.ctx.restore();
+            }
+          }
+
+          // Outer Flame Layer
+          const outerWiggle1 = Math.sin(t * 1.8) * (r * 0.28);
+          const outerWiggle2 = Math.cos(t * 2.2) * (r * 0.25);
+          const outerTipY = -tailLen + Math.sin(t * 2.5) * (r * 0.35);
+
+          this.ctx.save();
+          this.ctx.shadowColor = '#ff2a55';
+          this.ctx.shadowBlur = 18;
+
+          const redGrad = this.ctx.createLinearGradient(0, r * 0.3, 0, outerTipY);
+          redGrad.addColorStop(0, '#dc2626');
+          redGrad.addColorStop(0.5, '#ea580c');
+          redGrad.addColorStop(0.85, 'rgba(239, 68, 68, 0.7)');
+          redGrad.addColorStop(1, 'rgba(220, 38, 38, 0)');
+
+          this.ctx.fillStyle = redGrad;
+          this.ctx.beginPath();
+          this.ctx.moveTo(-r * 0.95, r * 0.1);
+          this.ctx.bezierCurveTo(
+            -r * 1.35, -r * 0.9 + outerWiggle1,
+            -r * 0.85, -tailLen * 0.55 - outerWiggle2,
+            outerWiggle1 * 0.5, outerTipY
+          );
+          this.ctx.bezierCurveTo(
+            r * 0.85, -tailLen * 0.55 + outerWiggle2,
+            r * 1.35, -r * 0.9 - outerWiggle1,
+            r * 0.95, r * 0.1
+          );
+          this.ctx.closePath();
+          this.ctx.fill();
+          this.ctx.restore();
+
+          // Mid Flame Layer
+          const midTipY = -tailLen * 0.78 + Math.cos(t * 3.1) * (r * 0.22);
+          const midWiggle = Math.sin(t * 2.8) * (r * 0.2);
+
+          this.ctx.save();
+          this.ctx.shadowColor = '#ff8800';
+          this.ctx.shadowBlur = 12;
+
+          const orangeGrad = this.ctx.createLinearGradient(0, r * 0.2, 0, midTipY);
+          orangeGrad.addColorStop(0, '#ff7a00');
+          orangeGrad.addColorStop(0.7, '#f59e0b');
+          orangeGrad.addColorStop(1, 'rgba(245, 158, 11, 0)');
+
+          this.ctx.fillStyle = orangeGrad;
+          this.ctx.beginPath();
+          this.ctx.moveTo(-r * 0.72, 0);
+          this.ctx.bezierCurveTo(
+            -r * 1.0, -r * 0.7 - midWiggle,
+            -r * 0.5, -tailLen * 0.45 + midWiggle,
+            midWiggle * 0.6, midTipY
+          );
+          this.ctx.bezierCurveTo(
+            r * 0.5, -tailLen * 0.45 - midWiggle,
+            r * 1.0, -r * 0.7 + midWiggle,
+            r * 0.72, 0
+          );
+          this.ctx.closePath();
+          this.ctx.fill();
+          this.ctx.restore();
+
+          // Core Flame Jet
+          const coreTipY = -tailLen * 0.52 + Math.sin(t * 3.8) * (r * 0.15);
+          const coreWiggle = Math.cos(t * 3.5) * (r * 0.12);
+
+          this.ctx.save();
+          this.ctx.shadowColor = '#ffea00';
+          this.ctx.shadowBlur = 14;
+
+          const yellowGrad = this.ctx.createLinearGradient(0, 0, 0, coreTipY);
+          yellowGrad.addColorStop(0, '#ffffff');
+          yellowGrad.addColorStop(0.35, '#fef08a');
+          yellowGrad.addColorStop(0.8, '#facc15');
+          yellowGrad.addColorStop(1, 'rgba(250, 204, 21, 0)');
+
+          this.ctx.fillStyle = yellowGrad;
+          this.ctx.beginPath();
+          this.ctx.moveTo(-r * 0.48, -r * 0.15);
+          this.ctx.bezierCurveTo(
+            -r * 0.6, -r * 0.5 + coreWiggle,
+            -r * 0.3, -tailLen * 0.32 - coreWiggle,
+            coreWiggle * 0.5, coreTipY
+          );
+          this.ctx.bezierCurveTo(
+            r * 0.3, -tailLen * 0.32 + coreWiggle,
+            r * 0.6, -r * 0.5 - coreWiggle,
+            r * 0.48, -r * 0.15
+          );
+          this.ctx.closePath();
+          this.ctx.fill();
+          this.ctx.restore();
+
+          // Sphere Body
+          this.ctx.save();
+          this.ctx.shadowColor = '#ff5500';
+          this.ctx.shadowBlur = 18;
+
+          const sphereGrad = this.ctx.createRadialGradient(-r * 0.28, r * 0.28, r * 0.15, 0, 0, r);
+          sphereGrad.addColorStop(0, '#ff9933');
+          sphereGrad.addColorStop(0.35, '#ea580c');
+          sphereGrad.addColorStop(0.72, '#c2410c');
+          sphereGrad.addColorStop(0.92, '#991b1b');
+          sphereGrad.addColorStop(1, '#5c0a0a');
+
+          this.ctx.fillStyle = sphereGrad;
+          this.ctx.beginPath();
+          this.ctx.arc(0, 0, r, 0, Math.PI * 2);
+          this.ctx.fill();
+
+          this.ctx.strokeStyle = '#3b0707';
+          this.ctx.lineWidth = 3.2;
+          this.ctx.stroke();
+
+          // Rotating Craters
+          this.ctx.save();
+          this.ctx.rotate(entity.angle);
+          const craters = [
+            { x: -r * 0.34, y: -r * 0.22, rad: r * 0.26 },
+            { x: r * 0.28, y: -r * 0.28, rad: r * 0.2 },
+            { x: r * 0.22, y: r * 0.32, rad: r * 0.24 },
+            { x: -r * 0.15, y: r * 0.38, rad: r * 0.15 }
+          ];
+          for (const cr of craters) {
+            this.ctx.fillStyle = '#4c0808';
+            this.ctx.beginPath();
+            this.ctx.arc(cr.x, cr.y, cr.rad, 0, Math.PI * 2);
+            this.ctx.fill();
+
+            this.ctx.strokeStyle = '#ea580c';
+            this.ctx.lineWidth = 1.4;
+            this.ctx.beginPath();
+            this.ctx.arc(cr.x, cr.y, cr.rad, 0.1 * Math.PI, 0.9 * Math.PI);
+            this.ctx.stroke();
+          }
+          this.ctx.restore();
+
+          // Specular highlight
+          this.ctx.strokeStyle = 'rgba(255, 235, 170, 0.75)';
+          this.ctx.lineWidth = 2.4;
+          this.ctx.beginPath();
+          this.ctx.arc(0, 0, r * 0.78, 0.45 * Math.PI, 0.9 * Math.PI);
+          this.ctx.stroke();
+
+          this.ctx.restore();
+        } else {
+          // Vocab Star
+          entity.pulse = (entity.pulse || 0) + 0.05;
+          const scale = 1 + 0.08 * Math.sin(entity.pulse);
+          this.ctx.scale(scale, scale);
+
+          this.ctx.shadowColor = '#ffd700';
+          this.ctx.shadowBlur = 15;
+          this.ctx.fillStyle = '#ffd700';
+          this.ctx.beginPath();
+          this.ctx.arc(0, 0, entity.radius, 0, Math.PI * 2);
+          this.ctx.fill();
+
+          this.ctx.fillStyle = '#0f172a';
+          this.ctx.beginPath();
+          this.ctx.arc(0, 0, entity.radius - 3, 0, Math.PI * 2);
+          this.ctx.fill();
+
+          this.ctx.font = '22px sans-serif';
+          this.ctx.textAlign = 'center';
+          this.ctx.textBaseline = 'middle';
+          this.ctx.fillText(entity.vocabItem.emoji, 0, 1);
+        }
+
+        this.ctx.restore();
+      }
+
+      attachEventListeners() {
+        window.addEventListener('keydown', (e) => {
+          if (e.key === 'a' || e.key === 'A') {
+            if (this.players[0]) this.players[0].moveLeft = true;
+          }
+          if (e.key === 'd' || e.key === 'D') {
+            if (this.players[0]) this.players[0].moveRight = true;
+          }
+          if (e.key === 'ArrowLeft') {
+            if (this.mode === 'duel' && this.players[1]) {
+              this.players[1].moveLeft = true;
+            } else if (this.mode === 'solo' && this.players[0]) {
+              this.players[0].moveLeft = true;
+            }
+          }
+          if (e.key === 'ArrowRight') {
+            if (this.mode === 'duel' && this.players[1]) {
+              this.players[1].moveRight = true;
+            } else if (this.mode === 'solo' && this.players[0]) {
+              this.players[0].moveRight = true;
+            }
+          }
+        });
+
+        window.addEventListener('keyup', (e) => {
+          if (e.key === 'a' || e.key === 'A') {
+            if (this.players[0]) this.players[0].moveLeft = false;
+          }
+          if (e.key === 'd' || e.key === 'D') {
+            if (this.players[0]) this.players[0].moveRight = false;
+          }
+          if (e.key === 'ArrowLeft') {
+            if (this.mode === 'duel' && this.players[1]) {
+              this.players[1].moveLeft = false;
+            } else if (this.mode === 'solo' && this.players[0]) {
+              this.players[0].moveLeft = false;
+            }
+          }
+          if (e.key === 'ArrowRight') {
+            if (this.mode === 'duel' && this.players[1]) {
+              this.players[1].moveRight = false;
+            } else if (this.mode === 'solo' && this.players[0]) {
+              this.players[0].moveRight = false;
+            }
+          }
+        });
+
+        const p1Left = document.getElementById('p1BtnLeft');
+        const p1Right = document.getElementById('p1BtnRight');
+
+        const bindTouch = (btn, onPress, onRelease) => {
+          btn.addEventListener('touchstart', (e) => { e.preventDefault(); onPress(); }, { passive: false });
+          btn.addEventListener('touchend', (e) => { e.preventDefault(); onRelease(); }, { passive: false });
+          btn.addEventListener('mousedown', (e) => { e.preventDefault(); onPress(); });
+          btn.addEventListener('mouseup', (e) => { e.preventDefault(); onRelease(); });
+          btn.addEventListener('mouseleave', () => onRelease());
+        };
+
+        bindTouch(p1Left, () => { if (this.players[0]) this.players[0].moveLeft = true; }, () => { if (this.players[0]) this.players[0].moveLeft = false; });
+        bindTouch(p1Right, () => { if (this.players[0]) this.players[0].moveRight = true; }, () => { if (this.players[0]) this.players[0].moveRight = false; });
+
+        const p2Left = document.getElementById('p2BtnLeft');
+        const p2Right = document.getElementById('p2BtnRight');
+        bindTouch(p2Left, () => { if (this.players[1]) this.players[1].moveLeft = true; }, () => { if (this.players[1]) this.players[1].moveLeft = false; });
+        bindTouch(p2Right, () => { if (this.players[1]) this.players[1].moveRight = true; }, () => { if (this.players[1]) this.players[1].moveRight = false; });
+
+        window.addEventListener('resize', () => {
+          this.initCanvasSize();
+          this.initStarfield();
+        });
+      }
+    }
+
+    let gameInstance = null;
+
+    window.onload = function() {
+      gameInstance = new SpaceCanvasGame();
+      gameInstance.render();
+
+      document.getElementById('svgPreviewPatrick').innerHTML = SVG_FACTORY.getAstronautFullBodySVG('patrick');
+      document.getElementById('svgPreviewPhoebe').innerHTML = SVG_FACTORY.getAstronautFullBodySVG('phoebe');
+      document.getElementById('svgPreviewAlex').innerHTML = SVG_FACTORY.getAstronautFullBodySVG('alex');
+
+      document.getElementById('skinPreviewRed').innerHTML = SVG_FACTORY.getRocketSVG('red', 110);
+      document.getElementById('skinPreviewBlue').innerHTML = SVG_FACTORY.getRocketSVG('blue', 110);
+      document.getElementById('skinPreviewGreen').innerHTML = SVG_FACTORY.getRocketSVG('green', 110);
+
+      const screenMain = document.getElementById('screenMainMenu');
+      const screenMode = document.getElementById('screenModeSelect');
+      const screenChar = document.getElementById('screenCharSelect');
+      const screenSkin = document.getElementById('screenSkinSelect');
+      const screenGame = document.getElementById('screenGameplay');
+      const screenVictory = document.getElementById('screenVictory');
+
+      const hideAllScreens = () => {
+        screenMain.classList.add('hidden');
+        screenMode.classList.add('hidden');
+        screenChar.classList.add('hidden');
+        screenSkin.classList.add('hidden');
+        screenGame.classList.add('hidden');
+        screenVictory.classList.add('hidden');
+      };
+
+      document.getElementById('btnStartGame').onclick = () => {
+        soundEngine.initContext();
+        soundEngine.playTone(520, 'triangle', 0.15);
+        hideAllScreens();
+        screenMode.classList.remove('hidden');
+      };
+
+      document.getElementById('btnSelectSolo').onclick = () => {
+        gameInstance.mode = 'solo';
+        gameInstance.selection.selectingPlayer = 1;
+        hideAllScreens();
+        screenChar.classList.remove('hidden');
+        updateCharSelectUI();
+      };
+
+      document.getElementById('btnSelectDuel').onclick = () => {
+        gameInstance.mode = 'duel';
+        gameInstance.selection.selectingPlayer = 1;
+        hideAllScreens();
+        screenChar.classList.remove('hidden');
+        updateCharSelectUI();
+      };
+
+      document.getElementById('btnBackToMain').onclick = () => {
+        hideAllScreens();
+        screenMain.classList.remove('hidden');
+      };
+
+      function updateCharSelectUI() {
+        const badge = document.getElementById('charSelectHeadingBadge');
+        if (gameInstance.selection.selectingPlayer === 1) {
+          badge.innerText = "PLAYER 1: CHOOSE ASTRONAUT";
+          badge.className = "inline-block px-4 py-1 rounded-full bg-neon-cyan/20 border border-neon-cyan/50 text-neon-cyan font-bold text-xs uppercase mb-2";
+        } else {
+          badge.innerText = "PLAYER 2: CHOOSE ASTRONAUT";
+          badge.className = "inline-block px-4 py-1 rounded-full bg-neon-pink/20 border border-neon-pink/50 text-neon-pink font-bold text-xs uppercase mb-2";
+        }
+      }
+
+      document.querySelectorAll('.char-card').forEach(card => {
+        card.onclick = () => {
+          const char = card.getAttribute('data-char');
+          soundEngine.playTone(680, 'sine', 0.12);
+
+          if (gameInstance.selection.selectingPlayer === 1) {
+            gameInstance.selection.p1Char = char;
+            hideAllScreens();
+            screenSkin.classList.remove('hidden');
+            updateSkinSelectUI();
+          } else {
+            gameInstance.selection.p2Char = char;
+            hideAllScreens();
+            screenSkin.classList.remove('hidden');
+            updateSkinSelectUI();
+          }
+        };
+      });
+
+      document.getElementById('btnBackToMode').onclick = () => {
+        hideAllScreens();
+        screenMode.classList.remove('hidden');
+      };
+
+      function updateSkinSelectUI() {
+        const badge = document.getElementById('skinSelectHeadingBadge');
+        if (gameInstance.selection.selectingPlayer === 1) {
+          badge.innerText = "PLAYER 1: ROCKET SKIN";
+          badge.className = "inline-block px-4 py-1 rounded-full bg-neon-cyan/20 border border-neon-cyan/50 text-neon-cyan font-bold text-xs uppercase mb-2";
+        } else {
+          badge.innerText = "PLAYER 2: ROCKET SKIN";
+          badge.className = "inline-block px-4 py-1 rounded-full bg-neon-pink/20 border border-neon-pink/50 text-neon-pink font-bold text-xs uppercase mb-2";
+        }
+      }
+
+      document.querySelectorAll('.skin-card').forEach(card => {
+        card.onclick = () => {
+          const skin = card.getAttribute('data-skin');
+          soundEngine.playTone(740, 'triangle', 0.15);
+
+          if (gameInstance.selection.selectingPlayer === 1) {
+            gameInstance.selection.p1Skin = skin;
+            if (gameInstance.mode === 'duel') {
+              gameInstance.selection.selectingPlayer = 2;
+              hideAllScreens();
+              screenChar.classList.remove('hidden');
+              updateCharSelectUI();
+            } else {
+              hideAllScreens();
+              screenGame.classList.remove('hidden');
+              gameInstance.startSession();
+            }
+          } else {
+            gameInstance.selection.p2Skin = skin;
+            hideAllScreens();
+            screenGame.classList.remove('hidden');
+            gameInstance.startSession();
+          }
+        };
+      });
+
+      document.getElementById('btnBackToChar').onclick = () => {
+        hideAllScreens();
+        screenChar.classList.remove('hidden');
+      };
+
+      document.getElementById('btnPlayAgain').onclick = () => {
+        hideAllScreens();
+        screenGame.classList.remove('hidden');
+        gameInstance.startSession();
+      };
+
+      document.getElementById('btnReturnHome').onclick = () => {
+        hideAllScreens();
+        screenMain.classList.remove('hidden');
+      };
+
+      const audioBtn = document.getElementById('btnAudioToggle');
+      const audioIcon = document.getElementById('audioIcon');
+      audioBtn.onclick = () => {
+        const isMuted = soundEngine.toggleMute();
+        if (isMuted) {
+          audioIcon.className = "fa-solid fa-volume-xmark text-lg text-slate-400";
+        } else {
+          audioIcon.className = "fa-solid fa-volume-high text-lg text-neon-cyan";
+        }
+      };
+
+      const fsBtn = document.getElementById('btnFullscreen');
+      fsBtn.onclick = () => {
+        if (!document.fullscreenElement) {
+          document.documentElement.requestFullscreen().catch(() => {});
+        } else {
+          if (document.exitFullscreen) document.exitFullscreen();
+        }
+      };
+    };
+  </script>
+</body>
+</html>
